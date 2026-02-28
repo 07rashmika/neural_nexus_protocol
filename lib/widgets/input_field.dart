@@ -11,6 +11,7 @@ class InputField extends StatefulWidget {
     required this.obscure,
     required this.controller,
     required this.keyBoardType,
+    this.validator,
   });
 
   final String label;
@@ -18,6 +19,7 @@ class InputField extends StatefulWidget {
   final bool obscure;
   final TextEditingController controller;
   final TextInputType keyBoardType;
+  final String? Function(String?)? validator;
 
   @override
   State<InputField> createState() => _InputFieldState();
@@ -78,7 +80,8 @@ class _InputFieldState extends State<InputField> {
                     ]
                   : [],
             ),
-            child: TextField(
+            child: TextFormField(
+              validator: widget.validator,
               keyboardType: widget.keyBoardType,
               controller: widget.controller,
               obscureText: widget.obscure,
@@ -90,7 +93,7 @@ class _InputFieldState extends State<InputField> {
               decoration: InputDecoration(
                 hintText: widget.hint,
                 hintStyle: GoogleFonts.spaceMono(
-                  fontSize: 11,
+                  fontSize: 14,
                   color: NeuralColors.tealBorder.withValues(alpha: 1.5),
                   letterSpacing: 1.5,
                 ),

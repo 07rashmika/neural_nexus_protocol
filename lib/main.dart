@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:neural_nexus_protocol/screens/login.dart';
+import 'package:neural_nexus_protocol/screens/auth_screen.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(
@@ -10,7 +11,7 @@ void main() {
       statusBarIconBrightness: Brightness.light,
     ),
   );
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: const Color(0xFF0A1510), //app theme
       ),
-      home: const LoginScreen(),
+      home: AuthScreen(),
     );
   }
 }

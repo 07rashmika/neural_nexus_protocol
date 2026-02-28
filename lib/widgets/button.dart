@@ -36,7 +36,7 @@ class _ButtonState extends State<Button> {
       onTapUp: (details) => setState(() {
         _pressed = false;
       }),
-      onTap: () {},
+      onTap: widget.onTap,
       child: MouseRegion(
         onEnter: (event) {
           setState(() {
