@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:neural_nexus_protocol/constants/colors.dart';
 
-import '../providers/login_screen_provider.dart';
+import '../../providers/login_screen_provider.dart';
 
 class SwapAuth extends ConsumerWidget {
   const SwapAuth({super.key});
