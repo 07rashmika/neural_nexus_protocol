@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:neural_nexus_protocol/screens/home_screen.dart';
-import '../providers/login_screen_provider.dart';
-import 'button.dart';
-import 'glow_text.dart';
+import '../../providers/login_screen_provider.dart';
+import '../button.dart';
+import '../glow_text.dart';
 import 'input_field.dart';
 
 class AuthForm extends ConsumerStatefulWidget {
@@ -80,14 +80,14 @@ class _AuthFormState extends ConsumerState<AuthForm>
           ? null
           : _confirmPasswordController.text;
 
-      // Call the parent submit hook (kept for later when you add real auth)
+      // need more work here later
       await widget.onSubmit(
         email: email,
         password: password,
         confirmPassword: confirmPassword,
       );
 
-      // Redirect after validation (and submit hook)
+      // redirection to home
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const HomeScreen()),

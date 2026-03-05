@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:neural_nexus_protocol/constants/colors.dart';
 import 'package:neural_nexus_protocol/screens/auth_screen.dart';
+import 'package:neural_nexus_protocol/widgets/circuit_background.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(
@@ -21,12 +22,23 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Neural Nexus Protocol',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF0A1510), //app theme
+        scaffoldBackgroundColor: NeuralColors.bg, //app theme
+        colorScheme: ColorScheme.dark(
+          primary: NeuralColors.teal,
+          secondary: NeuralColors.tealDim,
+        ),
       ),
-      home: AuthScreen(),
+      builder: (context, child) {
+        return Stack(
+          children: [
+            const Positioned.fill(child: CircuitBackground()),
+            Positioned.fill(child: child!),
+          ],
+        );
+      },
+      home: const AuthScreen(),
     );
   }
 }
