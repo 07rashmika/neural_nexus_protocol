@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:neural_nexus_protocol/widgets/chain/chain.dart';
 
-import 'package:neural_nexus_protocol/widgets/pixel_border.dart';
+import 'package:neural_nexus_protocol/widgets/common/pixel_border.dart';
 import 'package:neural_nexus_protocol/widgets/shield_count.dart';
 
 class DetailsBox extends StatelessWidget {

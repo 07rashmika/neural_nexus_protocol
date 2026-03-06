@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:neural_nexus_protocol/models/agent.dart';
 import 'package:neural_nexus_protocol/screens/game_screen.dart';
 import 'package:neural_nexus_protocol/screens/sector_map.dart';
-import 'package:neural_nexus_protocol/widgets/details_box.dart';
+import 'package:neural_nexus_protocol/widgets/common/details_box.dart';
 import 'package:neural_nexus_protocol/widgets/game_button.dart';
-import 'package:neural_nexus_protocol/widgets/logo_box.dart';
-import 'package:neural_nexus_protocol/widgets/profile/profile_popup.dart';
+import 'package:neural_nexus_protocol/widgets/common/logo_box.dart';
+import 'package:neural_nexus_protocol/widgets/profile/profile_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, required this.agent});
+
+  final Agent agent;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -17,28 +19,16 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    final agent = Agent(
-      id: 1,
-      email: 'email@gmail.com',
-      hashPassword: 'password123',
-      sessionToken: 'abc123token',
-      username: 'username',
-      intelPoints: 3.4,
-      level: 5,
-      position: 'position',
-    );
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 80,
-        // leadingWidth: 50,
         leading: IconButton(
-          onPressed: () => showProfileDialog(context, agent: agent),
+          onPressed: () => showProfileDialog(context, agent: widget.agent),
           icon: const Icon(Icons.leaderboard),
         ),
-
         actions: [
           IconButton(
-            onPressed: () => showProfileDialog(context, agent: agent),
+            onPressed: () => showProfileDialog(context, agent: widget.agent),
             icon: const Icon(Icons.person),
           ),
         ],
@@ -48,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SingleChildScrollView(
         child: Center(
           child: Column(
-            mainAxisAlignment: .center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const LogoBox(),
               const SizedBox(height: 40),

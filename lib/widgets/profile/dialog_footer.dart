@@ -4,31 +4,31 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../constants/colors.dart';
 
 class DialogFooter extends StatelessWidget {
-  const DialogFooter({super.key, required this.onClose});
+  const DialogFooter({super.key, required this.onLogout});
 
-  final VoidCallback onClose;
+  final VoidCallback onLogout;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const .symmetric(horizontal: 20, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       child: Row(
-        mainAxisAlignment: .end,
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
           GestureDetector(
-            onTap: onClose,
+            onTap: onLogout,
             child: Container(
-              padding: const .symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
-                border: .all(color: NeuralColors.teal, width: 1.5),
+                border: Border.all(color: Colors.redAccent, width: 1.5),
                 color: NeuralColors.bg2,
               ),
               child: Text(
-                'CLOSE',
+                'logout'.toUpperCase(),
                 style: GoogleFonts.spaceMono(
                   fontSize: 10,
-                  fontWeight: .w700,
-                  color: NeuralColors.teal,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.redAccent,
                   letterSpacing: 2,
                 ),
               ),

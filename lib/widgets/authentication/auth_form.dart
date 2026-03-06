@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:neural_nexus_protocol/screens/home_screen.dart';
 import '../../providers/login_screen_provider.dart';
 import '../button.dart';
-import '../glow_text.dart';
+import '../common/glow_text.dart';
 import 'input_field.dart';
 
 class AuthForm extends ConsumerStatefulWidget {
@@ -14,6 +13,7 @@ class AuthForm extends ConsumerStatefulWidget {
     required String email,
     required String password,
     String? confirmPassword,
+    String? username,
   })
   onSubmit;
 
@@ -24,14 +24,15 @@ class AuthForm extends ConsumerStatefulWidget {
 class _AuthFormState extends ConsumerState<AuthForm>
     with TickerProviderStateMixin {
   late AnimationController _flickerCtrl;
-  late AnimationController _btnSweepCtrl;
-
   late Animation<double> _flicker;
 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
+  String? _apiError;
 
   @override
   void initState() {
@@ -49,61 +50,74 @@ class _AuthFormState extends ConsumerState<AuthForm>
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.9), weight: 0.5),
       TweenSequenceItem(tween: ConstantTween(1.0), weight: 4.5),
     ]).animate(_flickerCtrl);
-
-    _btnSweepCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
   }
 
   @override
   void dispose() {
     _flickerCtrl.dispose();
-    _btnSweepCtrl.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _usernameController.dispose();
     super.dispose();
+  }
+
+  /// Clears all fields and resets validation when switching between login/register
+  void _clearAll() {
+    _emailController.clear();
+    _passwordController.clear();
+    _confirmPasswordController.clear();
+    _usernameController.clear();
+    _formKey.currentState?.reset();
+    setState(() => _apiError = null);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isLoggedInScreen = ref.watch(isLoginScreenProvider);
+    // Listen to screen changes and clear form whenever mode switches
+    ref.listen(isLoginScreenProvider, (_, _) => _clearAll());
+
+    final isLoginScreen = ref.watch(isLoginScreenProvider);
 
     Future<void> handleSubmit() async {
+      setState(() => _apiError = null);
+
+      print('=== SUBMIT PRESSED ===');
+      print('isLoginScreen: $isLoginScreen');
+      print('email: ${_emailController.text}');
+      print('password length: ${_passwordController.text.length}');
+      print('username: ${_usernameController.text}');
+      print('confirmPassword: ${_confirmPasswordController.text}');
+
       final isValid = _formKey.currentState?.validate() ?? false;
       if (!isValid) return;
 
-      final email = _emailController.text.trim();
-      final password = _passwordController.text;
-      final confirmPassword = isLoggedInScreen
-          ? null
-          : _confirmPasswordController.text;
-
-      // need more work here later
-      await widget.onSubmit(
-        email: email,
-        password: password,
-        confirmPassword: confirmPassword,
-      );
-
-      // redirection to home
-      if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+      try {
+        await widget.onSubmit(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          confirmPassword: isLoginScreen
+              ? null
+              : _confirmPasswordController.text,
+          username: isLoginScreen ? null : _usernameController.text.trim(),
+        );
+        // ← navigation removed from here, auth_screen.dart handles it
+      } on Exception catch (e) {
+        setState(
+          () => _apiError = e.toString().replaceFirst('Exception: ', ''),
+        );
+      }
     }
 
-    final glowTitle = isLoggedInScreen
-        ? 'WELCOME BACK AGENT!'
-        : 'WELCOME AGENT!';
-    final buttonText = isLoggedInScreen ? 'LOGIN' : 'REGISTER';
+    final glowTitle = isLoginScreen ? 'WELCOME BACK AGENT!' : 'WELCOME AGENT!';
+    final buttonText = isLoginScreen ? 'LOGIN' : 'REGISTER';
 
     String? emailValidator(String? value) {
       final v = (value ?? '').trim();
       if (v.isEmpty) return 'Email is required';
-      final emailOk = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v);
-      if (!emailOk) return 'Enter a valid email';
+      if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v)) {
+        return 'Enter a valid email';
+      }
       return null;
     }
 
@@ -115,10 +129,9 @@ class _AuthFormState extends ConsumerState<AuthForm>
     }
 
     String? confirmPasswordValidator(String? value) {
-      if (isLoggedInScreen) return null;
-      final v = value ?? '';
-      if (v.isEmpty) return 'Confirm your password';
-      if (v != _passwordController.text) return 'Passwords do not match';
+      if (isLoginScreen) return null; // skip entirely on login
+      if ((value ?? '').isEmpty) return 'Confirm your password';
+      if (value != _passwordController.text) return 'Passwords do not match';
       return null;
     }
 
@@ -149,7 +162,7 @@ class _AuthFormState extends ConsumerState<AuthForm>
             obscure: false,
             controller: _emailController,
             keyBoardType: TextInputType.emailAddress,
-            validator: (value) => emailValidator(value),
+            validator: emailValidator,
           ),
 
           const SizedBox(height: 16),
@@ -160,10 +173,10 @@ class _AuthFormState extends ConsumerState<AuthForm>
             obscure: true,
             controller: _passwordController,
             keyBoardType: TextInputType.visiblePassword,
-            validator: (value) => passwordValidator(value),
+            validator: passwordValidator,
           ),
 
-          if (!isLoggedInScreen) ...[
+          if (!isLoginScreen) ...[
             const SizedBox(height: 16),
             InputField(
               label: 'Confirm Password',
@@ -171,17 +184,22 @@ class _AuthFormState extends ConsumerState<AuthForm>
               obscure: true,
               controller: _confirmPasswordController,
               keyBoardType: TextInputType.visiblePassword,
-              validator: (value) => confirmPasswordValidator(value),
+              validator: confirmPasswordValidator,
+            ),
+          ],
+
+          if (_apiError != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              _apiError!,
+              style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+              textAlign: TextAlign.center,
             ),
           ],
 
           const SizedBox(height: 32),
 
-          Button(
-            sweepController: _btnSweepCtrl,
-            text: buttonText,
-            onTap: handleSubmit,
-          ),
+          Button(text: buttonText, onTap: handleSubmit),
 
           const SizedBox(height: 20),
         ],
