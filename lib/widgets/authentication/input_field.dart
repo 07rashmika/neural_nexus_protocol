@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:neural_nexus_protocol/widgets/section_label.dart';
 
 import '../../constants/colors.dart';
 
@@ -35,17 +36,8 @@ class _InputFieldState extends State<InputField> {
       children: [
         Row(
           children: [
-            Container(width: 16, height: 1, color: NeuralColors.tealDim),
             const SizedBox(width: 6),
-            Text(
-              widget.label.toUpperCase(),
-              style: GoogleFonts.spaceMono(
-                fontSize: 18,
-                fontWeight: .w600,
-                color: NeuralColors.tealDim,
-                letterSpacing: 2,
-              ),
-            ),
+            SectionLabel(text: widget.label.toUpperCase()),
           ],
         ),
         const SizedBox(height: 6),

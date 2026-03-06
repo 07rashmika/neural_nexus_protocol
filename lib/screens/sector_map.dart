@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:neural_nexus_protocol/widgets/glow_text.dart';
+import 'package:neural_nexus_protocol/widgets/common/glow_text.dart';
 
 class SectorMap extends StatelessWidget {
   const SectorMap({super.key});

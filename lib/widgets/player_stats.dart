@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:neural_nexus_protocol/widgets/pixel_border.dart';
+import 'package:neural_nexus_protocol/widgets/common/pixel_border.dart';
 
 class PlayerStats extends StatelessWidget {
   const PlayerStats({super.key});

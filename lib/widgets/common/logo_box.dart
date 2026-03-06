@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:neural_nexus_protocol/constants/colors.dart';
-import 'package:neural_nexus_protocol/widgets/pixel_border.dart';
+import 'package:neural_nexus_protocol/widgets/common/pixel_border.dart';
 
 class LogoBox extends StatelessWidget {
   const LogoBox({super.key});

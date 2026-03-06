@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:neural_nexus_protocol/constants/colors.dart';
 import 'package:neural_nexus_protocol/models/agent.dart';
-import 'package:neural_nexus_protocol/widgets/pixel_border.dart';
+import 'package:neural_nexus_protocol/providers/login_screen_provider.dart';
+import 'package:neural_nexus_protocol/services/api_service.dart';
+import 'package:neural_nexus_protocol/widgets/common/pixel_border.dart';
 import 'package:neural_nexus_protocol/widgets/stat_bar.dart';
 
 import '../info_row.dart';
@@ -17,33 +20,44 @@ void showProfileDialog(BuildContext context, {required Agent agent}) {
   );
 }
 
-class ProfileDialog extends StatelessWidget {
+class ProfileDialog extends ConsumerWidget {
   const ProfileDialog({super.key, required this.agent});
 
   final Agent agent;
 
+  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
+    await ApiService.logout();
+
+    // Reset auth screen back to login mode for the next session
+    ref.read(isLoginScreenProvider.notifier).state = true;
+
+    if (!context.mounted) return;
+    Navigator.of(context).pop();
+    Navigator.of(context).pushNamedAndRemoveUntil('/auth', (route) => false);
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const .symmetric(horizontal: 24, vertical: 40),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
       child: PixelBorder(
-        padding: .zero,
+        padding: EdgeInsets.zero,
         child: Container(
           color: NeuralColors.bg,
           constraints: const BoxConstraints(maxHeight: 520),
           child: Column(
-            mainAxisSize: .min,
+            mainAxisSize: MainAxisSize.min,
             children: [
               DialogHeader(agent: agent),
               const Divider(),
               Flexible(
                 child: SingleChildScrollView(
-                  padding: const .fromLTRB(20, 16, 20, 24),
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                   child: Column(
-                    crossAxisAlignment: .start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ── Identification ─────────────────────────────────────
+                      // ── Identification ──────────────────────────────────
                       SectionLabel(text: 'identification'),
                       const SizedBox(height: 10),
                       InfoRow(label: 'username', value: agent.username),
@@ -55,7 +69,7 @@ class ProfileDialog extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // ── Progress ───────────────────────────────────────────
+                      // ── Progress ────────────────────────────────────────
                       SectionLabel(text: 'agent progress'),
                       const SizedBox(height: 10),
                       InfoRow(
@@ -74,7 +88,7 @@ class ProfileDialog extends StatelessWidget {
                 ),
               ),
               const Divider(),
-              DialogFooter(onClose: () => Navigator.of(context).pop()),
+              DialogFooter(onLogout: () => _handleLogout(context, ref)),
             ],
           ),
         ),
@@ -82,5 +96,3 @@ class ProfileDialog extends StatelessWidget {
     );
   }
 }
-
-// ── Reusable sub-widgets ──────────────────────────────────────────────────────
