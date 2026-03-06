@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../constants/colors.dart';
@@ -19,12 +20,11 @@ class DialogHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
       child: Row(
         children: [
-          // Avatar circle
+          // Avatar — SVG if available, fallback to initials
           Container(
-            width: 52,
-            height: 52,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
               border: Border.all(color: NeuralColors.teal, width: 1.5),
               color: NeuralColors.bg2,
               boxShadow: [
@@ -35,20 +35,36 @@ class DialogHeader extends StatelessWidget {
                 ),
               ],
             ),
-            alignment: Alignment.center,
-            child: Text(
-              initials,
-              style: GoogleFonts.spaceMono(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: NeuralColors.teal,
-              ),
-            ),
+            padding: const EdgeInsets.all(4),
+            child: agent.avatarUrl.isNotEmpty
+                ? SvgPicture.network(
+                    agent.avatarUrl,
+                    placeholderBuilder: (_) => Center(
+                      child: Text(
+                        initials,
+                        style: GoogleFonts.spaceMono(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: NeuralColors.teal,
+                        ),
+                      ),
+                    ),
+                  )
+                : Center(
+                    child: Text(
+                      initials,
+                      style: GoogleFonts.spaceMono(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: NeuralColors.teal,
+                      ),
+                    ),
+                  ),
           ),
 
           const SizedBox(width: 14),
 
-          // Username + position
+          // Username + callsign/position
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +84,17 @@ class DialogHeader extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
+                if (agent.callsign != null && agent.callsign!.isNotEmpty)
+                  Text(
+                    '"${agent.callsign}"',
+                    style: GoogleFonts.spaceMono(
+                      fontSize: 10,
+                      color: NeuralColors.teal,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                const SizedBox(height: 2),
                 Text(
                   agent.position.toUpperCase(),
                   style: GoogleFonts.spaceMono(
@@ -81,7 +107,7 @@ class DialogHeader extends StatelessWidget {
             ),
           ),
 
-          // Close
+          // Close button
           GestureDetector(
             onTap: () => Navigator.of(context).pop(),
             child: const Icon(

@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:neural_nexus_protocol/constants/countries.dart';
 import 'package:neural_nexus_protocol/providers/agent_provider.dart';
 import 'package:neural_nexus_protocol/widgets/authentication/input_field.dart';
-import 'package:neural_nexus_protocol/widgets/button.dart';
+import 'package:neural_nexus_protocol/widgets/common/button.dart';
 import 'package:neural_nexus_protocol/widgets/section_label.dart';
 import 'package:neural_nexus_protocol/widgets/setup_profile/avatar_picker.dart';
 import 'package:neural_nexus_protocol/widgets/setup_profile/country_dropdown.dart';

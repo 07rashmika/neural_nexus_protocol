@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/login_screen_provider.dart';
-import '../button.dart';
+import '../common/button.dart';
 import '../common/glow_text.dart';
 import 'input_field.dart';
 

@@ -11,7 +11,7 @@ class ApiService {
       'https://nonallelic-nonrectified-matias.ngrok-free.dev/api';
   static const _storage = FlutterSecureStorage();
 
-  // ─── Avatar (DiceBear bottts — cyberpunk robots) ───────────────────────────
+  // dicebear avatar bots generation
 
   static List<String> generateAvatarOptions({int count = 6}) {
     final rng = Random();
@@ -21,7 +21,7 @@ class ApiService {
     });
   }
 
-  // ─── Auth ──────────────────────────────────────────────────────────────────
+  // authentication
 
   static Future<Map<String, dynamic>> register({
     required String email,
@@ -65,7 +65,7 @@ class ApiService {
     await _storage.delete(key: 'jwt');
   }
 
-  // ─── Profile ───────────────────────────────────────────────────────────────
+  // profile management
 
   static Future<Agent> setupProfile({
     required String username,

@@ -27,10 +27,7 @@ class ProfileDialog extends ConsumerWidget {
 
   Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
     await ApiService.logout();
-
-    // Reset auth screen back to login mode for the next session
     ref.read(isLoginScreenProvider.notifier).state = true;
-
     if (!context.mounted) return;
     Navigator.of(context).pop();
     Navigator.of(context).pushNamedAndRemoveUntil('/auth', (route) => false);
@@ -45,7 +42,7 @@ class ProfileDialog extends ConsumerWidget {
         padding: EdgeInsets.zero,
         child: Container(
           color: NeuralColors.bg,
-          constraints: const BoxConstraints(maxHeight: 520),
+          constraints: const BoxConstraints(maxHeight: 560),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -63,20 +60,42 @@ class ProfileDialog extends ConsumerWidget {
                       InfoRow(label: 'username', value: agent.username),
                       InfoRow(
                         label: 'agent id',
-                        value: '#${agent.id.toString().padLeft(6, '0')}',
+                        value:
+                            '#${agent.id.toString().substring(0, 8).toUpperCase()}',
                       ),
+                      if (agent.callsign != null && agent.callsign!.isNotEmpty)
+                        InfoRow(label: 'callsign', value: agent.callsign!),
+                      if (agent.country != null && agent.country!.isNotEmpty)
+                        InfoRow(label: 'region', value: agent.country!),
                       InfoRow(label: 'position', value: agent.position),
 
                       const SizedBox(height: 20),
 
-                      // ── Progress ────────────────────────────────────────
-                      SectionLabel(text: 'agent progress'),
+                      // ── Combat Stats ────────────────────────────────────
+                      SectionLabel(text: 'combat stats'),
                       const SizedBox(height: 10),
                       InfoRow(
                         label: 'level',
                         value: agent.level.toString(),
                         valueColor: NeuralColors.teal,
                       ),
+                      InfoRow(
+                        label: 'streak',
+                        value: '${agent.streak}x',
+                        valueColor: agent.streak > 0 ? NeuralColors.teal : null,
+                      ),
+                      InfoRow(
+                        label: 'shields',
+                        value: '🛡 x${agent.shieldCount}',
+                      ),
+                      InfoRow(
+                        label: 'chain mult',
+                        value: '${agent.chainMultiplier}x',
+                        valueColor: NeuralColors.teal,
+                      ),
+
+                      const SizedBox(height: 12),
+
                       StatBar(
                         label: 'intel points',
                         rawValue: agent.intelPoints,

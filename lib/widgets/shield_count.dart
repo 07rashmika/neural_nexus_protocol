@@ -2,12 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:neural_nexus_protocol/constants/colors.dart';
 
 class ShieldCount extends StatelessWidget {
-  const ShieldCount({super.key});
+  const ShieldCount({super.key, required this.count, this.max = 3});
+
+  final int count;
+  final int max;
 
   @override
   Widget build(BuildContext context) {
-    Icon outlinedShield = Icon(Icons.shield_outlined, color: NeuralColors.teal);
-    Icon shield = Icon(Icons.shield, color: NeuralColors.teal);
-    return Row(mainAxisSize: .min, children: [shield, shield, outlinedShield]);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(max, (i) {
+        final active = i < count;
+        return Icon(
+          active ? Icons.shield : Icons.shield_outlined,
+          color: active ? NeuralColors.teal : NeuralColors.tealDark,
+          size: 28,
+        );
+      }),
+    );
   }
 }

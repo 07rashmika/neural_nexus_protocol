@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:neural_nexus_protocol/services/api_service.dart';
-import 'package:neural_nexus_protocol/widgets/button.dart';
+import 'package:neural_nexus_protocol/widgets/common/button.dart';
 
 class ButtonLogout extends StatefulWidget {
   const ButtonLogout({super.key});
