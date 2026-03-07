@@ -1,60 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:neural_nexus_protocol/widgets/auth_form.dart';
-import 'package:neural_nexus_protocol/widgets/swap_auth.dart';
+import 'package:neural_nexus_protocol/providers/agent_provider.dart';
+import 'package:neural_nexus_protocol/screens/profile_setup_screen.dart';
+import 'package:neural_nexus_protocol/services/api_service.dart';
+import 'package:neural_nexus_protocol/widgets/authentication/auth_form.dart';
+import 'package:neural_nexus_protocol/widgets/authentication/swap_auth.dart';
 
 import '../painters/scan_line.dart';
 import '../providers/login_screen_provider.dart';
 import '../widgets/circuit_background.dart';
-import '../widgets/logo_box.dart';
+import '../widgets/common/logo_box.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
 
   @override
-  ConsumerState<AuthScreen> createState() => _AuthScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends ConsumerState<AuthScreen>
-    with TickerProviderStateMixin {
-  late AnimationController _logoGlowCtrl;
-
-  late Animation<double> _logoGlow;
-
-  Future<void> _submit({
-    required String email,
-    required String password,
-    String? confirmPassword,
-  }) async {
-    // authorization
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    _logoGlowCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    )..repeat(reverse: true);
-
-    _logoGlow = Tween<double>(
-      begin: 0.2,
-      end: 0.6,
-    ).animate(CurvedAnimation(parent: _logoGlowCtrl, curve: Curves.easeInOut));
-  }
-
-  @override
-  void dispose() {
-    _logoGlowCtrl.dispose();
-    super.dispose();
-  }
-
+class _AuthScreenState extends ConsumerState<AuthScreen> {
   @override
   Widget build(BuildContext context) {
-    final isLoggedInScreen = ref.watch(isLoginScreenProvider);
+    final isLoginScreen = ref.watch(isLoginScreenProvider);
+
+    Future<void> submit({
+      required String email,
+      required String password,
+      String? confirmPassword,
+      String? username,
+    }) async {
+      if (isLoginScreen) {
+        final res = await ApiService.login(email: email, password: password);
+        if (!res['success']) throw Exception(res['message']);
+        print('LOGIN RESPONSE: $res');
+
+        final agent = await ApiService.getProfile();
+        ref.read(agentProvider.notifier).state = agent;
+        print('PROFILE RESPONSE: $agent');
+
+        if (!mounted) return;
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil('/home', (route) => false);
+      } else {
+        final res = await ApiService.register(
+          email: email,
+          password: password,
+          confirmPassword: confirmPassword!,
+        );
+        if (!res['success']) throw Exception(res['message']);
+
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const ProfileSetupScreen()),
+        );
+      }
+    }
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           const Positioned.fill(child: CircuitBackground()),
@@ -62,15 +66,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const .symmetric(horizontal: 32, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 24,
+                ),
                 child: Column(
                   children: [
-                    AnimatedBuilder(
-                      animation: _logoGlow,
-                      builder: (context, child) =>
-                          LogoBox(glowOpacity: _logoGlow.value),
-                    ),
-                    AuthForm(onSubmit: _submit),
+                    const LogoBox(),
+                    AuthForm(onSubmit: submit),
                     const SizedBox(height: 16),
                     const SwapAuth(),
                   ],

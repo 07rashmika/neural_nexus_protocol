@@ -1,32 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:neural_nexus_protocol/constants/colors.dart';
+import 'package:neural_nexus_protocol/providers/agent_provider.dart';
 import 'package:neural_nexus_protocol/screens/auth_screen.dart';
+import 'package:neural_nexus_protocol/screens/home_screen.dart';
+import 'package:neural_nexus_protocol/widgets/circuit_background.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
     ),
   );
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Neural Nexus Protocol',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF0A1510), //app theme
+        scaffoldBackgroundColor: NeuralColors.bg,
+        colorScheme: ColorScheme.dark(
+          primary: NeuralColors.teal,
+          secondary: NeuralColors.tealDim,
+        ),
       ),
-      home: AuthScreen(),
+      builder: (context, child) {
+        return Stack(
+          children: [
+            const Positioned.fill(child: CircuitBackground()),
+            Positioned.fill(child: child!),
+          ],
+        );
+      },
+      initialRoute: '/auth',
+      routes: {
+        '/auth': (context) => const AuthScreen(),
+        '/home': (context) => Consumer(
+          builder: (context, ref, _) {
+            final agent = ref.watch(agentProvider);
+            if (agent == null) return const AuthScreen();
+            return HomeScreen(agent: agent);
+          },
+        ),
+      },
     );
   }
 }
