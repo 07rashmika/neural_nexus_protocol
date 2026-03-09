@@ -36,13 +36,13 @@ class _ButtonState extends State<Button> {
           duration: const Duration(milliseconds: 100),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 250),
-            width: double.infinity,
+            width: .infinity,
             height: 50,
             decoration: BoxDecoration(
               color: _hovered
                   ? NeuralColors.teal.withValues(alpha: .08)
                   : Colors.transparent,
-              border: Border.all(color: NeuralColors.teal, width: 1.5),
+              border: .all(color: NeuralColors.teal, width: 1.5),
               boxShadow: [
                 BoxShadow(
                   color: NeuralColors.teal.withValues(

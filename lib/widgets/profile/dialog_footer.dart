@@ -11,16 +11,16 @@ class DialogFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      padding: const .symmetric(horizontal: 20, vertical: 14),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: .end,
         children: [
           GestureDetector(
             onTap: onLogout,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const .symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.redAccent, width: 1.5),
+                border: .all(color: Colors.redAccent, width: 1.5),
                 color: NeuralColors.bg2,
               ),
               child: Text(

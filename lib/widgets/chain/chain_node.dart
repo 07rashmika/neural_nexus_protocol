@@ -22,7 +22,7 @@ class ChainNode extends StatelessWidget {
       width: diameter,
       height: diameter,
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
+        shape: .circle,
         color: color,
         boxShadow: glowOpacity > 0
             ? [
@@ -44,7 +44,7 @@ class ChainNode extends StatelessWidget {
           width: radius * 0.6,
           height: radius * 0.6,
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
+            shape: .circle,
             color: Colors.white.withValues(alpha: 0.4),
           ),
         ),

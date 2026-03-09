@@ -88,7 +88,7 @@ class _PixelBorderState extends State<PixelBorder>
       padding: widget.padding,
       decoration: BoxDecoration(
         color: Colors.transparent,
-        border: Border.all(color: widget.color, width: widget.borderWidth),
+        border: .all(color: widget.color, width: widget.borderWidth),
         boxShadow: widget.glow
             ? [
                 BoxShadow(
@@ -105,7 +105,7 @@ class _PixelBorderState extends State<PixelBorder>
             : [],
       ),
       child: Stack(
-        clipBehavior: Clip.none,
+        clipBehavior: .none,
         children: [..._buildBrackets(), widget.child],
       ),
     );

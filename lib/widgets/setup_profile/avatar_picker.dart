@@ -100,7 +100,7 @@ class _AvatarPickerState extends State<AvatarPicker> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
                 decoration: BoxDecoration(
-                  border: Border.all(
+                  border: .all(
                     color: selected ? NeuralColors.teal : NeuralColors.tealDark,
                     width: selected ? 2 : 1,
                   ),
@@ -108,7 +108,7 @@ class _AvatarPickerState extends State<AvatarPicker> {
                       ? NeuralColors.teal.withValues(alpha: 0.1)
                       : Colors.transparent,
                 ),
-                padding: const EdgeInsets.all(4),
+                padding: const .all(4),
                 child: SvgPicture.network(
                   url,
                   placeholderBuilder: (_) => const SizedBox(),
