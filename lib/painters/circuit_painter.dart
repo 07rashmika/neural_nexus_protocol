@@ -30,16 +30,6 @@ class CircuitPainter extends CustomPainter {
       const Offset(0.60, 0.57),
       const Offset(1.0, 0.57),
     ],
-    // [
-    //   const Offset(0, 0.94),
-    //   const Offset(0.15, 0.45),
-    //   const Offset(0.15, 0.54),
-    //   const Offset(0.44, 0.60),
-    //   const Offset(0.35, 0.38),
-    //   const Offset(0.60, 0.38),
-    //   const Offset(0.60, 0.57),
-    //   const Offset(1.0, 0.66),
-    // ],
     [
       const Offset(0, 0.63),
       const Offset(0.18, 0.63),

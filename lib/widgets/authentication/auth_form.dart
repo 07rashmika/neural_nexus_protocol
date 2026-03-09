@@ -147,7 +147,7 @@ class _AuthFormState extends ConsumerState<AuthForm>
               opacity: _flicker.value,
               child: GlowText(
                 text: glowTitle,
-                fontWeight: FontWeight.w900,
+                fontWeight: .w900,
                 fontSize: 24,
                 letterSpacing: 4,
               ),
@@ -161,7 +161,7 @@ class _AuthFormState extends ConsumerState<AuthForm>
             hint: 'email@domain.com',
             obscure: false,
             controller: _emailController,
-            keyBoardType: TextInputType.emailAddress,
+            keyBoardType: .emailAddress,
             validator: emailValidator,
           ),
 
@@ -172,7 +172,7 @@ class _AuthFormState extends ConsumerState<AuthForm>
             hint: '••••••••',
             obscure: true,
             controller: _passwordController,
-            keyBoardType: TextInputType.visiblePassword,
+            keyBoardType: .visiblePassword,
             validator: passwordValidator,
           ),
 
@@ -183,7 +183,7 @@ class _AuthFormState extends ConsumerState<AuthForm>
               hint: '••••••••',
               obscure: true,
               controller: _confirmPasswordController,
-              keyBoardType: TextInputType.visiblePassword,
+              keyBoardType: .visiblePassword,
               validator: confirmPasswordValidator,
             ),
           ],
@@ -193,7 +193,7 @@ class _AuthFormState extends ConsumerState<AuthForm>
             Text(
               _apiError!,
               style: const TextStyle(color: Colors.redAccent, fontSize: 13),
-              textAlign: TextAlign.center,
+              textAlign: .center,
             ),
           ],
 

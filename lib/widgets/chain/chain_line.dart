@@ -23,7 +23,7 @@ class ChainLine extends StatelessWidget {
       height: thickness,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(thickness / 2),
+        borderRadius: .circular(thickness / 2),
         boxShadow: glowOpacity > 0
             ? [
                 BoxShadow(

@@ -107,8 +107,8 @@ class _DetailsBoxState extends ConsumerState<DetailsBox> {
         width: 260,
         height: 200,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: .spaceEvenly,
+          crossAxisAlignment: .center,
           children: [
             ShieldCount(count: shieldCount, max: _maxShields),
             Text(

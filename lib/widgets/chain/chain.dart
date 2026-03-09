@@ -22,19 +22,12 @@ class ChainWidget extends StatefulWidget {
        );
 
   final int count;
-
   final int? activeCount;
-
   final double circleRadius;
-
   final double lineLength;
-
   final double lineThickness;
-
   final Color activeColor;
-
   final Color inactiveColor;
-
   final bool animate;
 
   @override
@@ -83,8 +76,8 @@ class _ChainWidgetState extends State<ChainWidget>
 
   Widget _buildChain(int active, {required double glowOpacity}) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: .min,
+      crossAxisAlignment: .center,
       children: List.generate(widget.count * 2 - 1, (i) {
         // Even indices → circle nodes, odd indices → connecting lines
         if (i.isEven) {

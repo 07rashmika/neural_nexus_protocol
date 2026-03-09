@@ -3,6 +3,8 @@ import 'dart:math';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:neural_nexus_protocol/models/node.dart';
+import 'package:neural_nexus_protocol/models/sector.dart';
 
 import '../models/agent.dart';
 
@@ -118,5 +120,81 @@ class ApiService {
   static Future<bool> isLoggedIn() async {
     final token = await _storage.read(key: 'jwt');
     return token != null && token.isNotEmpty;
+  }
+
+  static Future<Map<String, dynamic>> getSectors() async {
+    final token = await _storage.read(key: 'jwt');
+    final res = await http.get(
+      Uri.parse('$_base/sectors'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    final body = jsonDecode(res.body) as Map<String, dynamic>;
+    if (!(body['success'] as bool)) {
+      throw Exception(body['message'] ?? 'Failed to load sectors');
+    }
+    return {
+      'sectors': (body['sectors'] as List)
+          .map((s) => Sector.fromJson(s as Map<String, dynamic>))
+          .toList(),
+      'totalNodes': body['totalNodes'] as int,
+      'completedNodes': body['completedNodes'] as int,
+    };
+  }
+
+  static Future<void> updateSectorProgress({
+    required String sectorCode,
+    required int completedNodes,
+  }) async {
+    final token = await _storage.read(key: 'jwt');
+    final res = await http.post(
+      Uri.parse('$_base/sectors/progress'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'sectorCode': sectorCode,
+        'completedNodes': completedNodes,
+      }),
+    );
+    final body = jsonDecode(res.body) as Map<String, dynamic>;
+    if (!(body['success'] as bool)) {
+      throw Exception(body['message'] ?? 'Failed to update progress');
+    }
+  }
+
+  static Future<Map<String, dynamic>> getNodes(String sectorCode) async {
+    final token = await _storage.read(key: 'jwt');
+    final res = await http.get(
+      Uri.parse('$_base/nodes/$sectorCode'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    final body = jsonDecode(res.body) as Map<String, dynamic>;
+    if (!(body['success'] as bool)) {
+      throw Exception(body['message'] ?? 'Failed to load nodes');
+    }
+    return {
+      'sector': body['sector'] as Map<String, dynamic>,
+      'nodes': (body['nodes'] as List)
+          .map((n) => NodeModel.fromJson(n as Map<String, dynamic>))
+          .toList(),
+    };
+  }
+
+  static Future<Map<String, dynamic>> completeNode(String nodeId) async {
+    final token = await _storage.read(key: 'jwt');
+    final res = await http.post(
+      Uri.parse('$_base/nodes/complete'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'nodeId': nodeId}),
+    );
+    final body = jsonDecode(res.body) as Map<String, dynamic>;
+    if (!(body['success'] as bool)) {
+      throw Exception(body['message'] ?? 'Failed to complete node');
+    }
+    return body;
   }
 }
