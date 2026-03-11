@@ -24,10 +24,10 @@ class _SectorMapState extends State<SectorMap> {
   @override
   void initState() {
     super.initState();
-    _loadSectors();
+    loadSectors();
   }
 
-  Future<void> _loadSectors() async {
+  Future<void> loadSectors() async {
     setState(() {
       _loading = true;
       _error = null;
@@ -120,7 +120,7 @@ class _SectorMapState extends State<SectorMap> {
             ),
             const SizedBox(height: 16),
             GestureDetector(
-              onTap: _loadSectors,
+              onTap: loadSectors,
               child: Text(
                 'RETRY',
                 style: GoogleFonts.spaceMono(
@@ -137,11 +137,11 @@ class _SectorMapState extends State<SectorMap> {
     return RefreshIndicator(
       color: NeuralColors.teal,
       backgroundColor: NeuralColors.bg2,
-      onRefresh: _loadSectors,
+      onRefresh: loadSectors,
       child: ListView(
         padding: const .symmetric(horizontal: 24, vertical: 40),
         children: [
-          ..._sectors.map((s) => SectorCard(sector: s)),
+          ..._sectors.map((s) => SectorCard(sector: s, onReturn: loadSectors)),
           const SizedBox(height: 40),
           OverallProgress(completed: _completedNodes, total: _totalNodes),
           const SizedBox(height: 40),

@@ -1,36 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:neural_nexus_protocol/constants/colors.dart';
 import 'package:neural_nexus_protocol/models/agent.dart';
-import 'package:neural_nexus_protocol/screens/game_screen.dart';
+import 'package:neural_nexus_protocol/providers/agent_provider.dart';
+import 'package:neural_nexus_protocol/screens/daily_challenge_screen.dart';
+import 'package:neural_nexus_protocol/screens/leaderboard_screen.dart';
 import 'package:neural_nexus_protocol/screens/sector_map.dart';
 import 'package:neural_nexus_protocol/widgets/common/logo_box.dart';
 import 'package:neural_nexus_protocol/widgets/details_box.dart';
 import 'package:neural_nexus_protocol/widgets/game_button.dart';
 import 'package:neural_nexus_protocol/widgets/profile/profile_dialog.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key, required this.agent});
 
   final Agent agent;
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final liveAgent = ref.watch(agentProvider) ?? agent;
 
-class _HomeScreenState extends State<HomeScreen> {
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 80,
         leading: IconButton(
-          onPressed: () => showProfileDialog(context, agent: widget.agent),
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const LeaderboardScreen()),
+          ),
           icon: const Icon(Icons.leaderboard),
         ),
         actions: [
           GestureDetector(
-            onTap: () => showProfileDialog(context, agent: widget.agent),
+            onTap: () => showProfileDialog(context),
             child: Container(
               margin: const EdgeInsets.only(right: 16),
               width: 40,
@@ -48,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               padding: const EdgeInsets.all(4),
               child: SvgPicture.network(
-                widget.agent.avatarUrl,
+                liveAgent.avatarUrl,
                 placeholderBuilder: (_) => const Icon(
                   Icons.person,
                   color: NeuralColors.tealDim,
@@ -68,24 +70,24 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               const LogoBox(),
               const SizedBox(height: 40),
-              GameButton(
-                text: 'start mission',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const GameScreen()),
-                ),
-              ),
               const SizedBox(height: 20),
               GameButton(
                 text: 'sector map',
-                onTap: () => Navigator.push(
-                  context,
+                onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => const SectorMap()),
                 ),
               ),
               const SizedBox(height: 20),
-              GameButton(text: 'daily challenge', onTap: () {}),
+              GameButton(
+                text: 'daily challenge',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const DailyChallengeScreen(),
+                  ),
+                ),
+              ),
               const SizedBox(height: 60),
-              const DetailsBox(),
+              const DetailsBox(), // no routeObserver needed
             ],
           ),
         ),

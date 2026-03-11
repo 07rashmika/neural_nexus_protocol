@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:neural_nexus_protocol/constants/countries.dart';
 import 'package:neural_nexus_protocol/providers/agent_provider.dart';
 import 'package:neural_nexus_protocol/widgets/authentication/input_field.dart';
 import 'package:neural_nexus_protocol/widgets/common/button.dart';
@@ -30,6 +29,11 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
   String? _selectedAvatar;
   Map<String, String>? _selectedCountry;
 
+  // ── country fetch ─────────────────────────────────────────────────
+  List<Map<String, String>> _countries = [];
+  bool _loadingCountries = true;
+  String? _countriesError;
+
   bool _loading = false;
   String? _error;
 
@@ -52,6 +56,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.9), weight: 0.5),
       TweenSequenceItem(tween: ConstantTween(1.0), weight: 6.5),
     ]).animate(_flickerCtrl);
+
+    _fetchCountries();
   }
 
   @override
@@ -62,8 +68,27 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
     super.dispose();
   }
 
+  Future<void> _fetchCountries() async {
+    setState(() {
+      _loadingCountries = true;
+      _countriesError = null;
+    });
+    try {
+      final data = await ApiService.fetchCountries();
+      setState(() => _countries = data);
+    } catch (_) {
+      setState(() => _countriesError = 'Could not load countries');
+    } finally {
+      if (mounted) setState(() => _loadingCountries = false);
+    }
+  }
+
   Future<void> _handleSubmit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (_selectedAvatar == null) {
+      setState(() => _error = 'Please select an avatar');
+      return;
+    }
 
     setState(() {
       _loading = true;
@@ -99,13 +124,13 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
       backgroundColor: NeuralColors.bg,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const .symmetric(horizontal: 24, vertical: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: .start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // title
+                // ── title ─────────────────────────────────────────
                 Center(
                   child: AnimatedBuilder(
                     animation: _flicker,
@@ -134,10 +159,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
 
                 const SizedBox(height: 32),
 
-                // avatar picker
+                // ── avatar picker ─────────────────────────────────
                 SectionLabel(text: 'select avatar'),
                 const SizedBox(height: 12),
-
                 AvatarPicker(
                   onAvatarSelected: (url) =>
                       setState(() => _selectedAvatar = url),
@@ -145,19 +169,17 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
 
                 const SizedBox(height: 28),
 
-                // username
+                // ── username ──────────────────────────────────────
                 InputField(
                   label: 'agent username',
-                  keyBoardType: .text,
+                  keyBoardType: TextInputType.text,
                   obscure: false,
                   controller: _usernameCtrl,
                   hint: 'Agent_X',
                   validator: (v) {
                     final s = (v ?? '').trim();
                     if (s.isEmpty) return 'Username is required';
-                    if (s.length < 3 || s.length > 20) {
-                      return '3–20 characters';
-                    }
+                    if (s.length < 3 || s.length > 20) return '3–20 characters';
                     if (!RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(s)) {
                       return 'Letters, numbers, _ or - only';
                     }
@@ -167,10 +189,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
 
                 const SizedBox(height: 20),
 
-                // callsign
-                const SizedBox(height: 8),
+                // ── callsign ──────────────────────────────────────
                 InputField(
-                  keyBoardType: .text,
+                  keyBoardType: TextInputType.text,
                   label: 'callsign (optional)',
                   obscure: false,
                   controller: _callsignCtrl,
@@ -183,18 +204,74 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
 
                 const SizedBox(height: 20),
 
-                // country selection
+                // ── country ───────────────────────────────────────
                 SectionLabel(text: 'region'),
                 const SizedBox(height: 8),
 
-                CountryDropdown(
-                  countries: kCountries,
-                  selectedCountry: _selectedCountry,
-                  onCountrySelected: (country) =>
-                      setState(() => _selectedCountry = country),
-                ),
+                if (_loadingCountries)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 14,
+                      horizontal: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: NeuralColors.tealDark),
+                    ),
+                    child: Row(
+                      children: [
+                        const SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1.5,
+                            color: NeuralColors.tealDim,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Loading countries...',
+                          style: GoogleFonts.spaceMono(
+                            fontSize: 11,
+                            color: NeuralColors.tealBorder,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else if (_countriesError != null)
+                  Row(
+                    children: [
+                      Text(
+                        _countriesError!,
+                        style: GoogleFonts.spaceMono(
+                          fontSize: 10,
+                          color: const Color(0xFFFF4B6E),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      GestureDetector(
+                        onTap: _fetchCountries,
+                        child: Text(
+                          'RETRY',
+                          style: GoogleFonts.spaceMono(
+                            fontSize: 10,
+                            color: NeuralColors.teal,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  CountryDropdown(
+                    countries: _countries,
+                    selectedCountry: _selectedCountry,
+                    onCountrySelected: (country) =>
+                        setState(() => _selectedCountry = country),
+                  ),
 
-                // error
+                // ── error ─────────────────────────────────────────
                 if (_error != null) ...[
                   const SizedBox(height: 16),
                   Text(
@@ -203,13 +280,13 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
                       color: Colors.redAccent,
                       fontSize: 12,
                     ),
-                    textAlign: .center,
+                    textAlign: TextAlign.center,
                   ),
                 ],
 
                 const SizedBox(height: 32),
 
-                // submit button
+                // ── submit ────────────────────────────────────────
                 Button(text: 'save agent', onTap: _handleSubmit),
 
                 const SizedBox(height: 24),

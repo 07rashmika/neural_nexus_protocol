@@ -178,7 +178,27 @@ class ApiService {
       'nodes': (body['nodes'] as List)
           .map((n) => NodeModel.fromJson(n as Map<String, dynamic>))
           .toList(),
+      'carrotsRemaining': body['carrotsRemaining'] as int? ?? 3,
     };
+  }
+
+  static Future<Map<String, dynamic>> useHint({
+    required String sectorCode,
+  }) async {
+    final token = await _storage.read(key: 'jwt');
+    final res = await http.post(
+      Uri.parse('$_base/nodes/hint'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'sectorCode': sectorCode}),
+    );
+    final body = jsonDecode(res.body) as Map<String, dynamic>;
+    if (!(body['success'] as bool)) {
+      throw Exception(body['message'] ?? 'Hint failed');
+    }
+    return body;
   }
 
   static Future<Map<String, dynamic>> completeNode(String nodeId) async {
@@ -196,5 +216,167 @@ class ApiService {
       throw Exception(body['message'] ?? 'Failed to complete node');
     }
     return body;
+  }
+
+  // ── Heart Puzzle ──────────────────────────────────────────────────────────────
+
+  static Future<Map<String, dynamic>> fetchHeartPuzzle() async {
+    const url = 'https://marcconrad.com/uob/heart/api.php?out=json&base64=no';
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode != 200) {
+      throw Exception('Puzzle fetch failed: ${response.statusCode}');
+    }
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>?> submitAnswer({
+    required int round,
+    required int answer,
+    required bool correct,
+    required int timeTaken,
+    required int carrots,
+    int chain = 0, // consecutive corrects BEFORE this answer
+    int timeLeft = 0, // seconds remaining on timer
+  }) async {
+    try {
+      final token = await _storage.read(key: 'jwt');
+      final res = await http.post(
+        Uri.parse('$_base/game/submit'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'round': round,
+          'answer': answer,
+          'correct': correct,
+          'time_taken': timeTaken,
+          'carrots_earned': carrots,
+          'chain': chain,
+          'time_left': timeLeft,
+        }),
+      );
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (body['success'] != true) return null;
+      // Return full body — caller reads shieldData, intelEarned, levelUp, etc.
+      return body;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> syncShields() async {
+    try {
+      final token = await _storage.read(key: 'jwt');
+      final res = await http.get(
+        Uri.parse('$_base/game/shields'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (body['success'] == true) return body;
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<void> failNode() async {
+    final token = await _storage.read(key: 'jwt');
+    await http.post(
+      Uri.parse('$_base/nodes/fail'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+  }
+
+  static Future<Map<String, dynamic>> getDailyChallengeStatus() async {
+    final token = await _storage.read(key: 'jwt');
+    final res = await http.get(
+      Uri.parse('$_base/daily/status'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    final body = jsonDecode(res.body) as Map<String, dynamic>;
+    if (!(body['success'] as bool)) {
+      throw Exception(body['message'] ?? 'Failed to get daily status');
+    }
+    return body;
+  }
+
+  static Future<void> startDailyChallenge() async {
+    final token = await _storage.read(key: 'jwt');
+    final res = await http.post(
+      Uri.parse('$_base/daily/start'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    final body = jsonDecode(res.body) as Map<String, dynamic>;
+    if (!(body['success'] as bool)) {
+      throw Exception(body['message'] ?? 'Failed to start daily challenge');
+    }
+  }
+
+  static Future<Map<String, dynamic>> completeDailyChallenge({
+    required bool passed,
+    required int puzzlesPassed,
+  }) async {
+    final token = await _storage.read(key: 'jwt');
+    final res = await http.post(
+      Uri.parse('$_base/daily/complete'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'passed': passed, 'puzzlesPassed': puzzlesPassed}),
+    );
+    final body = jsonDecode(res.body) as Map<String, dynamic>;
+    if (!(body['success'] as bool)) {
+      throw Exception(body['message'] ?? 'Failed to complete daily challenge');
+    }
+    return body;
+  }
+
+  static Future<void> updateUsername(String username) async {
+    final token = await _storage.read(key: 'jwt');
+    final res = await http.patch(
+      Uri.parse('$_base/profile/username'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'username': username}),
+    );
+    final body = jsonDecode(res.body) as Map<String, dynamic>;
+    if (!(body['success'] as bool)) {
+      throw Exception(body['message'] ?? 'Failed to update username');
+    }
+  }
+
+  static Future<Map<String, dynamic>> getLeaderboard() async {
+    final token = await _storage.read(key: 'jwt');
+    final res = await http.get(
+      Uri.parse('$_base/game/leaderboard'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    final body = jsonDecode(res.body) as Map<String, dynamic>;
+    if (body['success'] != true) {
+      throw Exception(body['message'] ?? 'Failed to load leaderboard');
+    }
+    return body;
+  }
+
+  static Future<List<Map<String, String>>> fetchCountries() async {
+    final res = await http.get(
+      Uri.parse('https://restcountries.com/v3.1/all?fields=name,flag'),
+    );
+    if (res.statusCode != 200) throw Exception('Failed to load countries');
+    final list = jsonDecode(res.body) as List;
+    final countries = list
+        .map(
+          (c) => {
+            'name': c['name']['common'] as String,
+            'flag': c['flag'] as String,
+          },
+        )
+        .toList();
+    countries.sort((a, b) => a['name']!.compareTo(b['name']!));
+    return countries;
   }
 }
