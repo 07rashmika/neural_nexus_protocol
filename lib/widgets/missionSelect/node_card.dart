@@ -6,8 +6,7 @@ import 'package:neural_nexus_protocol/widgets/common/pixel_border.dart';
 import 'package:neural_nexus_protocol/widgets/missionSelect/status_icon.dart';
 
 class NodeCard extends StatefulWidget {
-  const NodeCard({required this.node, required this.onStart});
-
+  const NodeCard({super.key, required this.node, required this.onStart});
   final NodeModel node;
   final VoidCallback onStart;
 
@@ -18,24 +17,20 @@ class NodeCard extends StatefulWidget {
 class _NodeCardState extends State<NodeCard> {
   bool _pressed = false;
 
+  bool get _tappable => widget.node.isCurrent;
+
   Color get _borderColor {
     if (widget.node.isCompleted) return Colors.greenAccent;
-    if (widget.node.isCurrent) return NeuralColors.teal;
-    if (widget.node.isLocked) {
-      return NeuralColors.tealDark.withValues(alpha: 0.5);
-    }
-    return NeuralColors.teal;
+    if (widget.node.isCurrent) return _difficultyColor;
+    return NeuralColors.tealDark.withValues(alpha: 0.4);
   }
 
-  Color get _difficultyColor {
-    if (widget.node.isLocked) return NeuralColors.tealDark;
-    return switch (widget.node.difficulty) {
-      NodeDifficulty.standard => Colors.greenAccent,
-      NodeDifficulty.secured => NeuralColors.teal,
-      NodeDifficulty.critical => Colors.orangeAccent,
-      NodeDifficulty.boss => Colors.redAccent,
-    };
-  }
+  Color get _difficultyColor => switch (widget.node.difficulty) {
+    NodeDifficulty.standard => Colors.greenAccent,
+    NodeDifficulty.secured => NeuralColors.teal,
+    NodeDifficulty.critical => const Color(0xFFFFB347),
+    NodeDifficulty.boss => const Color(0xFFFF4B6E),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +38,10 @@ class _NodeCardState extends State<NodeCard> {
     final isLocked = node.isLocked;
 
     return GestureDetector(
-      onTapDown: isLocked ? null : (_) => setState(() => _pressed = true),
-      onTapUp: isLocked ? null : (_) => setState(() => _pressed = false),
-      onTapCancel: isLocked ? null : () => setState(() => _pressed = false),
-      onTap: isLocked ? null : widget.onStart,
+      onTapDown: _tappable ? (_) => setState(() => _pressed = true) : null,
+      onTapUp: _tappable ? (_) => setState(() => _pressed = false) : null,
+      onTapCancel: _tappable ? () => setState(() => _pressed = false) : null,
+      onTap: _tappable ? widget.onStart : null,
       child: AnimatedScale(
         scale: _pressed ? 0.97 : 1.0,
         duration: const Duration(milliseconds: 80),
@@ -55,26 +50,26 @@ class _NodeCardState extends State<NodeCard> {
           glow: node.isCurrent,
           glowMin: 0.1,
           glowMax: 0.4,
-          padding: .zero,
+          padding: EdgeInsets.zero,
           child: Container(
             color: isLocked
                 ? NeuralColors.bg2.withValues(alpha: 0.4)
                 : NeuralColors.bg2,
             child: Column(
               children: [
-                // ── Card body ────────────────────────────────────────
+                // ── Card body ─────────────────────────────────────────
                 Expanded(
                   child: Padding(
-                    padding: const .fromLTRB(16, 20, 16, 12),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
                     child: Column(
-                      mainAxisAlignment: .spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         // Node name
                         Text(
                           'Node ${node.nodeNumber}',
                           style: GoogleFonts.spaceMono(
                             fontSize: 11,
-                            fontWeight: .w700,
+                            fontWeight: FontWeight.w700,
                             color: isLocked
                                 ? NeuralColors.tealDark
                                 : _borderColor,
@@ -82,14 +77,42 @@ class _NodeCardState extends State<NodeCard> {
                           ),
                         ),
 
-                        // Difficulty
-                        Text(
-                          node.difficultyLabel,
-                          style: GoogleFonts.spaceMono(
-                            fontSize: 10,
-                            color: _difficultyColor,
-                            letterSpacing: 1,
+                        // Difficulty badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
                           ),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: isLocked
+                                  ? NeuralColors.tealDark.withValues(alpha: 0.4)
+                                  : _difficultyColor.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          child: Text(
+                            node.difficultyLabel.toUpperCase(),
+                            style: GoogleFonts.spaceMono(
+                              fontSize: 8,
+                              color: isLocked
+                                  ? NeuralColors.tealDark
+                                  : _difficultyColor,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ),
+
+                        // Rules label (2 puzzles · 30s)
+                        Text(
+                          node.rulesLabel,
+                          style: GoogleFonts.spaceMono(
+                            fontSize: 8,
+                            color: isLocked
+                                ? NeuralColors.tealDark.withValues(alpha: 0.5)
+                                : NeuralColors.tealDim,
+                            letterSpacing: 0.5,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
 
                         // Status icon
@@ -99,22 +122,68 @@ class _NodeCardState extends State<NodeCard> {
                   ),
                 ),
 
-                // ── Start button (current node only) ─────────────────
+                // ── Start button (current node only) ──────────────────
                 if (node.isCurrent)
                   Container(
-                    width: .infinity,
-                    color: NeuralColors.teal,
-                    padding: const .symmetric(vertical: 14),
+                    width: double.infinity,
+                    color: _difficultyColor,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     child: Center(
                       child: Text(
-                        'START',
+                        'INFILTRATE',
                         style: GoogleFonts.spaceMono(
-                          fontSize: 11,
-                          fontWeight: .w700,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
                           color: NeuralColors.bg,
                           letterSpacing: 3,
                         ),
                       ),
+                    ),
+                  ),
+
+                // ── Completed stamp ───────────────────────────────────
+                if (node.isCompleted)
+                  Container(
+                    width: double.infinity,
+                    color: Colors.greenAccent.withValues(alpha: 0.1),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Center(
+                      child: Text(
+                        '✓ CLEARED',
+                        style: GoogleFonts.spaceMono(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.greenAccent,
+                          letterSpacing: 3,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // ── Locked indicator ──────────────────────────────────
+                if (node.isLocked)
+                  Container(
+                    width: double.infinity,
+                    color: NeuralColors.tealDark.withValues(alpha: 0.15),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.lock_outline,
+                          color: NeuralColors.tealDark,
+                          size: 10,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'LOCKED',
+                          style: GoogleFonts.spaceMono(
+                            fontSize: 9,
+                            color: NeuralColors.tealDark,
+                            letterSpacing: 3,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
               ],
@@ -125,5 +194,3 @@ class _NodeCardState extends State<NodeCard> {
     );
   }
 }
-
-

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:neural_nexus_protocol/constants/colors.dart';
 import 'package:neural_nexus_protocol/models/node.dart';
 import 'package:neural_nexus_protocol/models/sector.dart';
+import 'package:neural_nexus_protocol/screens/game_screen.dart';
 import 'package:neural_nexus_protocol/services/api_service.dart';
 import 'package:neural_nexus_protocol/widgets/common/glow_text.dart';
 import 'package:neural_nexus_protocol/widgets/missionSelect/node_card.dart';
@@ -21,6 +21,7 @@ class _MissionSelectScreenState extends State<MissionSelectScreen> {
   List<NodeModel> _nodes = [];
   bool _loading = true;
   String? _error;
+  int _carrotsRemaining = 3;
 
   @override
   void initState() {
@@ -37,6 +38,7 @@ class _MissionSelectScreenState extends State<MissionSelectScreen> {
       final data = await ApiService.getNodes(widget.sector.code);
       setState(() {
         _nodes = data['nodes'] as List<NodeModel>;
+        _carrotsRemaining = data['carrotsRemaining'] as int? ?? 3;
         _loading = false;
       });
     } catch (e) {
@@ -71,9 +73,9 @@ class _MissionSelectScreenState extends State<MissionSelectScreen> {
                   Text(
                     'BACK',
                     style: GoogleFonts.spaceMono(
-                      fontSize: 11,
+                      fontSize: 12,
                       color: NeuralColors.tealDim,
-                      letterSpacing: 1,
+                      letterSpacing: 2,
                     ),
                   ),
                 ],
@@ -158,12 +160,14 @@ class _MissionSelectScreenState extends State<MissionSelectScreen> {
 
   void _onStartNode(NodeModel node) {
     if (node.isLocked || node.isCompleted) return;
-    // TODO: Navigate to game screen passing node
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(builder: (_) => GameScreen(node: node)),
-    // );
+    Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => GameScreen(
+        node: node,
+        sectorCode: widget.sector.code,
+        carrotsRemaining: _carrotsRemaining, // ← pass it
+      ),
+    ),
+  ).then((_) => _loadNodes());
   }
 }
-
-// ─── Node Card ────────────────────────────────────────────────────────────────
-

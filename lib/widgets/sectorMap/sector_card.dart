@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:neural_nexus_protocol/constants/colors.dart';
 import 'package:neural_nexus_protocol/models/sector.dart';
 import 'package:neural_nexus_protocol/screens/mission_select_screen.dart';
@@ -8,8 +7,11 @@ import 'package:neural_nexus_protocol/widgets/common/pixel_border.dart';
 import 'package:neural_nexus_protocol/widgets/sectorMap/node_dots.dart';
 
 class SectorCard extends StatefulWidget {
-  const SectorCard({super.key, required this.sector});
+  const SectorCard({super.key, required this.sector, required this.onReturn});
+
   final Sector sector;
+  final VoidCallback onReturn;
+
   @override
   State<SectorCard> createState() => _SectorCardState();
 }
@@ -42,11 +44,16 @@ class _SectorCardState extends State<SectorCard> {
         onTapCancel: _isLocked ? null : () => setState(() => _pressed = false),
         onTap: _isLocked
             ? null
-            : () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => MissionSelectScreen(sector: s),
-                ),
-              ),
+            : () {
+                Navigator.of(context)
+                    .push(
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            MissionSelectScreen(sector: widget.sector),
+                      ),
+                    )
+                    .then((_) => widget.onReturn()); // ← call it on return
+              },
         child: AnimatedScale(
           scale: _pressed ? 0.98 : 1.0,
           duration: const Duration(milliseconds: 80),
