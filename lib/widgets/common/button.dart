@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:neural_nexus_protocol/constants/colors.dart';
 
 class Button extends StatefulWidget {
-  const Button({
-    super.key,
-    required this.text,
-    required this.onTap,
-  });
+  const Button({super.key, required this.text, required this.onTap});
 
   final String text;
   final void Function() onTap;

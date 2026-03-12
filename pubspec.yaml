@@ -39,6 +39,8 @@ dependencies:
   http: ^1.6.0
   flutter_secure_storage: ^10.0.0
   flutter_svg: ^2.2.3
+  # audioplayers: ^6.0.0
+  # dotenv: ^4.2.0
 
 dev_dependencies:
   flutter_test:

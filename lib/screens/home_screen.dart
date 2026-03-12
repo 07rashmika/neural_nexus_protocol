@@ -34,11 +34,11 @@ class HomeScreen extends ConsumerWidget {
           GestureDetector(
             onTap: () => showProfileDialog(context),
             child: Container(
-              margin: const EdgeInsets.only(right: 16),
+              margin: const .only(right: 16),
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                border: Border.all(color: NeuralColors.teal, width: 1.5),
+                border: .all(color: NeuralColors.teal, width: 1.5),
                 color: NeuralColors.bg2,
                 boxShadow: [
                   BoxShadow(
@@ -48,7 +48,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(4),
+              padding: const .all(4),
               child: SvgPicture.network(
                 liveAgent.avatarUrl,
                 placeholderBuilder: (_) => const Icon(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:neural_nexus_protocol/providers/agent_provider.dart';
+import 'package:neural_nexus_protocol/screens/loading_screen.dart';
 import 'package:neural_nexus_protocol/widgets/authentication/input_field.dart';
 import 'package:neural_nexus_protocol/widgets/common/button.dart';
 import 'package:neural_nexus_protocol/widgets/section_label.dart';
@@ -9,7 +10,6 @@ import 'package:neural_nexus_protocol/widgets/setup_profile/avatar_picker.dart';
 import 'package:neural_nexus_protocol/widgets/setup_profile/country_dropdown.dart';
 
 import '../constants/colors.dart';
-import '../models/agent.dart';
 import '../services/api_service.dart';
 import '../widgets/common/glow_text.dart';
 
@@ -29,7 +29,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
   String? _selectedAvatar;
   Map<String, String>? _selectedCountry;
 
-  // ── country fetch ─────────────────────────────────────────────────
   List<Map<String, String>> _countries = [];
   bool _loadingCountries = true;
   String? _countriesError;
@@ -95,8 +94,20 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
       _error = null;
     });
 
+    // Push loading screen before API call
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: true,
+        pageBuilder: (_, _, _) =>
+            const LoadingScreen(message: 'initialising agent...'),
+        transitionDuration: const Duration(milliseconds: 200),
+        transitionsBuilder: (_, anim, _, child) =>
+            FadeTransition(opacity: anim, child: child),
+      ),
+    );
+
     try {
-      final Agent agent = await ApiService.setupProfile(
+      final agent = await ApiService.setupProfile(
         username: _usernameCtrl.text.trim(),
         avatarUrl: _selectedAvatar!,
         callsign: _callsignCtrl.text.trim(),
@@ -104,17 +115,16 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
             ? '${_selectedCountry!['flag']} ${_selectedCountry!['name']}'
             : null,
       );
-
       ref.read(agentProvider.notifier).state = agent;
-
       if (!mounted) return;
-      Navigator.of(
-        context,
-      ).pushNamedAndRemoveUntil('/home', (route) => false, arguments: agent);
+      Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
     } on Exception catch (e) {
-      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
-    } finally {
-      if (mounted) setState(() => _loading = false);
+      // Pop loading screen, show error on this screen
+      if (mounted) Navigator.of(context).pop();
+      setState(() {
+        _error = e.toString().replaceFirst('Exception: ', '');
+        _loading = false;
+      });
     }
   }
 

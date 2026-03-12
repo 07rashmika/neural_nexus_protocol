@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import 'package:neural_nexus_protocol/constants/colors.dart';
 import 'package:neural_nexus_protocol/models/node.dart';
 import 'package:neural_nexus_protocol/providers/agent_provider.dart';
@@ -186,10 +187,11 @@ class _GameScreenState extends ConsumerState<GameScreen>
       _answered = true;
     });
     _glowCtrl.forward(from: 0);
-    if (correct)
+    if (correct) {
       _handleCorrectAnswer(digit);
-    else
+    } else {
       _handleWrongAnswer(digit: digit);
+    }
   }
 
   Future<void> _handleCorrectAnswer(int digit) async {
@@ -273,10 +275,11 @@ class _GameScreenState extends ConsumerState<GameScreen>
         _nodeDone = true;
         _nodePassed = passed;
       });
-      if (passed)
+      if (passed) {
         _completeNodeOnBackend();
-      else
+      } else {
         _onNodeFailed();
+      }
     }
   }
 
@@ -351,9 +354,9 @@ class _GameScreenState extends ConsumerState<GameScreen>
       backgroundColor: NeuralColors.bg,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const .symmetric(horizontal: 24, vertical: 16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             children: [
               _buildHeader(shields),
               const SizedBox(height: 6),
@@ -401,7 +404,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
             children: List.generate(widget.node.lives + 1, (i) {
               final spent = i > _livesLeft;
               return Padding(
-                padding: const EdgeInsets.only(right: 4),
+                padding: const .only(right: 4),
                 child: Icon(
                   spent ? Icons.favorite_border : Icons.favorite,
                   color: spent
@@ -459,7 +462,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
               return Expanded(
                 child: Container(
                   height: 3,
-                  margin: EdgeInsets.only(right: i < total - 1 ? 3 : 0),
+                  margin: .only(right: i < total - 1 ? 3 : 0),
                   color: c,
                 ),
               );
@@ -478,10 +481,10 @@ class _GameScreenState extends ConsumerState<GameScreen>
         ? const Color(0xFFFFB347)
         : const Color(0xFFFF4B6E);
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: .spaceBetween,
           children: [
             Text(
               'TIME',
@@ -496,7 +499,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
               style: GoogleFonts.spaceMono(
                 fontSize: 11,
                 color: barColor,
-                fontWeight: FontWeight.w700,
+                fontWeight: .w700,
               ),
             ),
           ],
@@ -505,13 +508,13 @@ class _GameScreenState extends ConsumerState<GameScreen>
         ClipRect(
           child: Container(
             height: 3,
-            width: double.infinity,
+            width: .infinity,
             color: NeuralColors.tealDark,
             child: AnimatedFractionallySizedBox(
               widthFactor: fraction,
               duration: const Duration(milliseconds: 800),
               curve: Curves.linear,
-              alignment: Alignment.centerLeft,
+              alignment: .centerLeft,
               child: Container(color: barColor),
             ),
           ),
@@ -524,7 +527,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
     if (_loading) {
       return Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
             SizedBox(
               width: 22,
@@ -550,7 +553,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
     if (_error != null) {
       return Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
             Text(
               _error!,
@@ -558,7 +561,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
                 fontSize: 11,
                 color: const Color(0xFFFF4B6E),
               ),
-              textAlign: TextAlign.center,
+              textAlign: .center,
             ),
             const SizedBox(height: 20),
             Button(text: 'Retry', onTap: _fetchPuzzle),
@@ -573,15 +576,15 @@ class _GameScreenState extends ConsumerState<GameScreen>
       children: [
         Expanded(
           child: Container(
-            width: double.infinity,
+            width: .infinity,
             decoration: BoxDecoration(
-              border: Border.all(color: NeuralColors.tealDark),
+              border: .all(color: NeuralColors.tealDark),
               color: NeuralColors.teal.withValues(alpha: 0.02),
             ),
-            padding: const EdgeInsets.all(12),
+            padding: const .all(12),
             child: Image.network(
               _questionUrl!,
-              fit: BoxFit.contain,
+              fit: .contain,
               loadingBuilder: (_, child, progress) => progress == null
                   ? child
                   : Center(
@@ -609,7 +612,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
         // ── Hint / intel row ─────────────────────────────────────────
         if (!_answered)
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: .spaceBetween,
             children: [
               Text(
                 '+${(10 + _timeLeft) * mult} IP  x$mult',
@@ -627,12 +630,12 @@ class _GameScreenState extends ConsumerState<GameScreen>
                     : null,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
+                  padding: const .symmetric(
                     horizontal: 10,
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    border: Border.all(
+                    border: .all(
                       color: (_carrotsRemaining > 0 && !_hintUsedThisPuzzle)
                           ? const Color(0xFFFFB347)
                           : NeuralColors.tealDark,
@@ -697,17 +700,17 @@ class _GameScreenState extends ConsumerState<GameScreen>
                         ),
                       ],
                     ),
-                    textAlign: TextAlign.center,
+                    textAlign: .center,
                   ),
                   if (_answerCorrect == true && mult >= 2)
                     Padding(
-                      padding: const EdgeInsets.only(top: 4),
+                      padding: const .only(top: 4),
                       child: Text(
                         mult >= 5 ? '🔥 MAX CHAIN x$mult' : '⚡ CHAIN x$mult',
                         style: GoogleFonts.spaceMono(
                           fontSize: 10,
                           color: const Color(0xFFFFB347),
-                          fontWeight: FontWeight.w700,
+                          fontWeight: .w700,
                           letterSpacing: 2,
                         ),
                       ),
@@ -768,7 +771,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          border: Border.all(color: border),
+          border: .all(color: border),
           color: bg,
         ),
         child: Center(
@@ -776,7 +779,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
             '$digit',
             style: GoogleFonts.spaceMono(
               fontSize: 18,
-              fontWeight: FontWeight.w700,
+              fontWeight: .w700,
               color: text,
             ),
           ),
@@ -792,7 +795,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
     return Center(
       child: SingleChildScrollView(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
             Icon(
               passed ? Icons.verified_rounded : Icons.cancel_outlined,
@@ -807,10 +810,10 @@ class _GameScreenState extends ConsumerState<GameScreen>
               style: GoogleFonts.spaceMono(
                 fontSize: 14,
                 color: color,
-                fontWeight: FontWeight.w700,
+                fontWeight: .w700,
                 letterSpacing: 3,
               ),
-              textAlign: TextAlign.center,
+              textAlign: .center,
             ),
             const SizedBox(height: 6),
             Text(
@@ -833,7 +836,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
             _resultRow('Hints left', '🥕 x$_carrotsRemaining'),
             if (passed && _completing)
               Padding(
-                padding: const EdgeInsets.only(top: 8),
+                padding: const .only(top: 8),
                 child: Text(
                   'Saving...',
                   style: GoogleFonts.spaceMono(
@@ -844,13 +847,13 @@ class _GameScreenState extends ConsumerState<GameScreen>
               ),
             if (_levelUp)
               Padding(
-                padding: const EdgeInsets.only(top: 8),
+                padding: const .only(top: 8),
                 child: Text(
                   '▲ LEVEL UP!',
                   style: GoogleFonts.spaceMono(
                     fontSize: 12,
                     color: const Color(0xFFFFB347),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: .w700,
                     letterSpacing: 3,
                   ),
                 ),
@@ -886,9 +889,9 @@ class _GameScreenState extends ConsumerState<GameScreen>
   }
 
   Widget _resultRow(String label, String value) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
+    padding: const .symmetric(vertical: 4),
     child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: .center,
       children: [
         Text(
           '$label: ',
@@ -902,7 +905,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
           style: GoogleFonts.spaceMono(
             fontSize: 10,
             color: NeuralColors.textMain,
-            fontWeight: FontWeight.w700,
+            fontWeight: .w700,
           ),
         ),
       ],

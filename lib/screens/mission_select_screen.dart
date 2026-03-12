@@ -4,6 +4,7 @@ import 'package:neural_nexus_protocol/constants/colors.dart';
 import 'package:neural_nexus_protocol/models/node.dart';
 import 'package:neural_nexus_protocol/models/sector.dart';
 import 'package:neural_nexus_protocol/screens/game_screen.dart';
+import 'package:neural_nexus_protocol/screens/loading_screen.dart';
 import 'package:neural_nexus_protocol/services/api_service.dart';
 import 'package:neural_nexus_protocol/widgets/common/glow_text.dart';
 import 'package:neural_nexus_protocol/widgets/missionSelect/node_card.dart';
@@ -49,20 +50,50 @@ class _MissionSelectScreenState extends State<MissionSelectScreen> {
     }
   }
 
+  void _onStartNode(NodeModel node) {
+    if (node.isLocked || node.isCompleted) return;
+
+    // Push loading screen, then replace it with game screen after brief delay
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: true,
+        pageBuilder: (_, _, _) => const LoadingScreen(message: 'loading node...'),
+        transitionDuration: const Duration(milliseconds: 200),
+        transitionsBuilder: (_, anim, _, child) =>
+            FadeTransition(opacity: anim, child: child),
+      ),
+    );
+
+    Future.delayed(const Duration(milliseconds: 600), () {
+      if (!mounted) return;
+      Navigator.of(context)
+          .pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => GameScreen(
+                node: node,
+                sectorCode: widget.sector.code,
+                carrotsRemaining: _carrotsRemaining,
+              ),
+            ),
+          )
+          .then((_) => _loadNodes());
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 80,
         leading: FittedBox(
-          fit: .scaleDown,
-          alignment: .centerLeft,
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
           child: Padding(
-            padding: const .only(left: 16),
+            padding: const EdgeInsets.only(left: 16),
             child: GestureDetector(
               onTap: () => Navigator.of(context).pop(),
               child: Row(
-                mainAxisSize: .min,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(
                     Icons.arrow_back_ios,
@@ -87,14 +118,14 @@ class _MissionSelectScreenState extends State<MissionSelectScreen> {
           text:
               '${widget.sector.name.toUpperCase()} · ${widget.sector.subtitle.toUpperCase()}',
           fontSize: 11,
-          fontWeight: .w700,
+          fontWeight: FontWeight.w700,
           letterSpacing: 2,
         ),
         centerTitle: true,
         backgroundColor: NeuralColors.bg2,
         automaticallyImplyLeading: false,
         bottom: PreferredSize(
-          preferredSize: const .fromHeight(1.5),
+          preferredSize: const Size.fromHeight(1.5),
           child: Container(height: 1.5, color: NeuralColors.teal),
         ),
       ),
@@ -112,7 +143,7 @@ class _MissionSelectScreenState extends State<MissionSelectScreen> {
     if (_error != null) {
       return Center(
         child: Column(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               _error!,
@@ -120,7 +151,7 @@ class _MissionSelectScreenState extends State<MissionSelectScreen> {
                 color: Colors.redAccent,
                 fontSize: 11,
               ),
-              textAlign: .center,
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             GestureDetector(
@@ -144,7 +175,7 @@ class _MissionSelectScreenState extends State<MissionSelectScreen> {
       backgroundColor: NeuralColors.bg2,
       onRefresh: _loadNodes,
       child: GridView.builder(
-        padding: const .all(24),
+        padding: const EdgeInsets.all(24),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 16,
@@ -156,18 +187,5 @@ class _MissionSelectScreenState extends State<MissionSelectScreen> {
             NodeCard(node: _nodes[i], onStart: () => _onStartNode(_nodes[i])),
       ),
     );
-  }
-
-  void _onStartNode(NodeModel node) {
-    if (node.isLocked || node.isCompleted) return;
-    Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (_) => GameScreen(
-        node: node,
-        sectorCode: widget.sector.code,
-        carrotsRemaining: _carrotsRemaining, // ← pass it
-      ),
-    ),
-  ).then((_) => _loadNodes());
   }
 }

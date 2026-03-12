@@ -218,8 +218,6 @@ class ShieldNotifier extends Notifier<ShieldState> {
   }
 }
 
-// ── Provider ──────────────────────────────────────────────────────────────────
-
 final shieldProvider = NotifierProvider<ShieldNotifier, ShieldState>(
   ShieldNotifier.new,
 );

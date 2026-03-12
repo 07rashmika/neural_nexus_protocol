@@ -301,10 +301,6 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
     );
   }
 
-  // ─────────────────────────────────────────────────────────────────
-  // BUILD
-  // ─────────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -325,19 +321,17 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
     );
   }
 
-  // ── lobby ─────────────────────────────────────────────────────────
-
   Widget _buildLobby() {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const .all(24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           _buildBackButton(),
           const Spacer(),
           Center(
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: [
                 Text(
                   'DAILY',
@@ -363,10 +357,10 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
                 _statRow('Reward', '🥕 +10 on completion'),
                 const SizedBox(height: 8),
                 Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
+                  width: .infinity,
+                  padding: const .all(12),
                   decoration: BoxDecoration(
-                    border: Border.all(
+                    border: .all(
                       color: const Color(0xFFFF4B6E).withValues(alpha: 0.4),
                     ),
                     color: const Color(0xFFFF4B6E).withValues(alpha: 0.04),
@@ -378,7 +372,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
                       color: const Color(0xFFFF4B6E),
                       letterSpacing: 1,
                     ),
-                    textAlign: TextAlign.center,
+                    textAlign: .center,
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -404,15 +398,15 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
         '${s.toString().padLeft(2, '0')}';
 
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const .all(24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           _buildBackButton(),
           const Spacer(),
           Center(
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: [
                 Icon(
                   _alreadyCompleted
@@ -428,7 +422,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
                   _alreadyCompleted ? 'CHALLENGE COMPLETE' : 'CHALLENGE FAILED',
                   style: GoogleFonts.spaceMono(
                     fontSize: 14,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: .w700,
                     letterSpacing: 3,
                     color: _alreadyCompleted
                         ? NeuralColors.teal
@@ -452,7 +446,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
                   style: GoogleFonts.spaceMono(
                     fontSize: 28,
                     color: NeuralColors.teal,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: .w700,
                     letterSpacing: 4,
                   ),
                 ),
@@ -470,9 +464,9 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
   Widget _buildGame() {
     final shields = ref.watch(shieldProvider);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const .symmetric(horizontal: 24, vertical: 16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           _buildGameHeader(shields),
           const SizedBox(height: 6),
@@ -497,7 +491,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
             fontSize: 9,
             color: const Color(0xFFFFB347),
             letterSpacing: 3,
-            fontWeight: FontWeight.w700,
+            fontWeight: .w700,
           ),
         ),
         const Spacer(),
@@ -506,7 +500,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
           style: GoogleFonts.spaceMono(
             fontSize: 13,
             color: NeuralColors.teal,
-            fontWeight: FontWeight.w700,
+            fontWeight: .w700,
           ),
         ),
       ],
@@ -529,20 +523,21 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
           child: Row(
             children: List.generate(_puzzleCount, (i) {
               Color c;
-              if (i < _puzzleIndex)
+              if (i < _puzzleIndex) {
                 c = NeuralColors.teal;
-              else if (i == _puzzleIndex)
+              } else if (i == _puzzleIndex) {
                 c = _answered
                     ? (_answerCorrect == true
                           ? NeuralColors.teal
                           : const Color(0xFFFF4B6E))
                     : NeuralColors.tealDim;
-              else
+              } else {
                 c = NeuralColors.tealDark;
+              }
               return Expanded(
                 child: Container(
                   height: 3,
-                  margin: EdgeInsets.only(right: i < _puzzleCount - 1 ? 3 : 0),
+                  margin: .only(right: i < _puzzleCount - 1 ? 3 : 0),
                   color: c,
                 ),
               );
@@ -561,10 +556,10 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
         ? const Color(0xFFFFB347)
         : const Color(0xFFFF4B6E);
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: .spaceBetween,
           children: [
             Text(
               'TIME',
@@ -579,7 +574,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
               style: GoogleFonts.spaceMono(
                 fontSize: 11,
                 color: barColor,
-                fontWeight: FontWeight.w700,
+                fontWeight: .w700,
               ),
             ),
           ],
@@ -588,13 +583,13 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
         ClipRect(
           child: Container(
             height: 3,
-            width: double.infinity,
+            width: .infinity,
             color: NeuralColors.tealDark,
             child: AnimatedFractionallySizedBox(
               widthFactor: fraction,
               duration: const Duration(milliseconds: 800),
               curve: Curves.linear,
-              alignment: Alignment.centerLeft,
+              alignment: .centerLeft,
               child: Container(color: barColor),
             ),
           ),
@@ -607,7 +602,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
     if (_loading) {
       return Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
             SizedBox(
               width: 22,
@@ -633,7 +628,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
     if (_error != null) {
       return Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
             Text(
               _error!,
@@ -653,15 +648,15 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
       children: [
         Expanded(
           child: Container(
-            width: double.infinity,
+            width: .infinity,
             decoration: BoxDecoration(
-              border: Border.all(color: NeuralColors.tealDark),
+              border: .all(color: NeuralColors.tealDark),
               color: NeuralColors.teal.withValues(alpha: 0.02),
             ),
-            padding: const EdgeInsets.all(12),
+            padding: const .all(12),
             child: Image.network(
               _questionUrl!,
-              fit: BoxFit.contain,
+              fit: .contain,
               loadingBuilder: (_, child, prog) => prog == null
                   ? child
                   : Center(
@@ -688,7 +683,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
         // Hint row
         if (!_answered)
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: .spaceBetween,
             children: [
               Text(
                 '+${10 + _timeLeft} IP',
@@ -705,12 +700,9 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
                       })
                     : null,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
+                  padding: const .symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    border: Border.all(
+                    border: .all(
                       color: !_hintUsedThisPuzzle
                           ? const Color(0xFFFFB347)
                           : NeuralColors.tealDark,
@@ -809,7 +801,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          border: Border.all(color: border),
+          border: .all(color: border),
           color: bg,
         ),
         child: Center(
@@ -817,7 +809,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
             '$digit',
             style: GoogleFonts.spaceMono(
               fontSize: 18,
-              fontWeight: FontWeight.w700,
+              fontWeight: .w700,
               color: text,
             ),
           ),
@@ -833,11 +825,11 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
         ? NeuralColors.teal
         : const Color(0xFFFF4B6E);
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const .all(24),
       child: Center(
         child: SingleChildScrollView(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             children: [
               Icon(
                 _challengePassed
@@ -852,10 +844,10 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
                 style: GoogleFonts.spaceMono(
                   fontSize: 14,
                   color: color,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: .w700,
                   letterSpacing: 3,
                 ),
-                textAlign: TextAlign.center,
+                textAlign: .center,
               ),
               const SizedBox(height: 6),
               Text(
@@ -875,7 +867,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
               ],
               if (_submitting)
                 Padding(
-                  padding: const EdgeInsets.only(top: 8),
+                  padding: const .only(top: 8),
                   child: Text(
                     'Saving...',
                     style: GoogleFonts.spaceMono(
@@ -902,7 +894,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
     return GestureDetector(
       onTap: () => Navigator.of(context).pop(),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: [
           const Icon(
             Icons.arrow_back_ios,
@@ -924,9 +916,9 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
   }
 
   Widget _statRow(String label, String value) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
+    padding: const .symmetric(vertical: 4),
     child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: .center,
       children: [
         Text(
           '$label: ',
@@ -940,7 +932,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
           style: GoogleFonts.spaceMono(
             fontSize: 10,
             color: NeuralColors.textMain,
-            fontWeight: FontWeight.w700,
+            fontWeight: .w700,
           ),
         ),
       ],
