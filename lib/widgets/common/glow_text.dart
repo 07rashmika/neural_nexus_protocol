@@ -25,7 +25,7 @@ class _GlowTextState extends State<GlowText> {
   @override
   Widget build(BuildContext context) {
     return Text(
-      widget.text,
+      widget.text.toUpperCase(),
       textAlign: .center,
       style: GoogleFonts.spaceMono(
         fontSize: widget.fontSize,

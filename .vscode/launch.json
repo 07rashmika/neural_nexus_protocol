@@ -1,0 +1,26 @@
+{
+  "configurations": [
+    {
+        "name": "Flutter",
+        "type": "dart",
+        "request": "launch",
+        "program": "lib/main.dart"
+    },
+
+
+    {
+      "name": "Neural Nexus",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=FREESOUND_API_KEY=aJTHbQYpQWjLsClOaha03fix0cUl6CsetCd6rVVI"
+      ]
+    }
+  ]
+}
+// Then just press **Run** in VS Code and it passes the key automatically every time.
+
+// **If you use Android Studio** instead, go to Run → Edit Configurations → Additional run args and add:
+// ```
+// --dart-define=FREESOUND_API_KEY=your_key_here

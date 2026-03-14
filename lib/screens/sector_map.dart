@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:neural_nexus_protocol/constants/colors.dart';
 import 'package:neural_nexus_protocol/models/sector.dart';
 import 'package:neural_nexus_protocol/services/api_service.dart';
-import 'package:neural_nexus_protocol/widgets/common/glow_text.dart';
+import 'package:neural_nexus_protocol/widgets/common/async_state_view.dart';
+import 'package:neural_nexus_protocol/widgets/common/retro_back_app_bar.dart';
 import 'package:neural_nexus_protocol/widgets/sectorMap/overall_progress.dart';
 import 'package:neural_nexus_protocol/widgets/sectorMap/sector_card.dart';
 
@@ -51,48 +51,8 @@ class _SectorMapState extends State<SectorMap> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 80,
-        leading: FittedBox(
-          fit: .scaleDown,
-          alignment: .centerLeft,
-          child: GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Row(
-              mainAxisSize: .min,
-              children: [
-                const SizedBox(width: 16),
-                const Icon(
-                  Icons.arrow_back_ios,
-                  color: NeuralColors.tealDim,
-                  size: 12,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'BACK',
-                  style: GoogleFonts.spaceMono(
-                    fontSize: 13,
-                    color: NeuralColors.tealDim,
-                    letterSpacing: 2,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        title: GlowText(
-          text: 'SECTOR MAP',
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 4,
-        ),
-        centerTitle: true,
-        backgroundColor: NeuralColors.bg2,
-        automaticallyImplyLeading: false,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.5),
-          child: Container(height: 1.5, color: NeuralColors.teal),
-        ),
+      appBar: const RetroBackAppBar(
+        title: 'SECTOR MAP',
       ),
       backgroundColor: Colors.transparent,
       body: _buildBody(),
@@ -101,38 +61,10 @@ class _SectorMapState extends State<SectorMap> {
 
   Widget _buildBody() {
     if (_loading) {
-      return const Center(
-        child: CircularProgressIndicator(color: NeuralColors.teal),
-      );
+      return const AsyncStateView.loading();
     }
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: .min,
-          children: [
-            Text(
-              _error!,
-              style: GoogleFonts.spaceMono(
-                color: Colors.redAccent,
-                fontSize: 11,
-              ),
-              textAlign: .center,
-            ),
-            const SizedBox(height: 16),
-            GestureDetector(
-              onTap: loadSectors,
-              child: Text(
-                'RETRY',
-                style: GoogleFonts.spaceMono(
-                  color: NeuralColors.teal,
-                  fontSize: 11,
-                  letterSpacing: 2,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
+      return AsyncStateView.error(error: _error!, onRetry: loadSectors);
     }
     return RefreshIndicator(
       color: NeuralColors.teal,

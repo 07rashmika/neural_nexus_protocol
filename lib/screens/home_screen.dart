@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:neural_nexus_protocol/constants/colors.dart';
 import 'package:neural_nexus_protocol/models/agent.dart';
 import 'package:neural_nexus_protocol/providers/agent_provider.dart';
 import 'package:neural_nexus_protocol/screens/daily_challenge_screen.dart';
 import 'package:neural_nexus_protocol/screens/leaderboard_screen.dart';
 import 'package:neural_nexus_protocol/screens/sector_map.dart';
+import 'package:neural_nexus_protocol/widgets/common/avatar_frame.dart';
 import 'package:neural_nexus_protocol/widgets/common/logo_box.dart';
 import 'package:neural_nexus_protocol/widgets/details_box.dart';
 import 'package:neural_nexus_protocol/widgets/game_button.dart';
@@ -20,6 +19,9 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final liveAgent = ref.watch(agentProvider) ?? agent;
+    final fallbackText = liveAgent.username.isNotEmpty
+        ? liveAgent.username.characters.first.toUpperCase()
+        : 'A';
 
     return Scaffold(
       appBar: AppBar(
@@ -35,27 +37,10 @@ class HomeScreen extends ConsumerWidget {
             onTap: () => showProfileDialog(context),
             child: Container(
               margin: const EdgeInsets.only(right: 16),
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                border: Border.all(color: NeuralColors.teal, width: 1.5),
-                color: NeuralColors.bg2,
-                boxShadow: [
-                  BoxShadow(
-                    color: NeuralColors.teal.withValues(alpha: 0.25),
-                    blurRadius: 10,
-                    spreadRadius: -2,
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.all(4),
-              child: SvgPicture.network(
-                liveAgent.avatarUrl,
-                placeholderBuilder: (_) => const Icon(
-                  Icons.person,
-                  color: NeuralColors.tealDim,
-                  size: 18,
-                ),
+              child: AvatarFrame(
+                imageUrl: liveAgent.avatarUrl,
+                fallbackText: fallbackText,
+                size: 40,
               ),
             ),
           ),
@@ -87,7 +72,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 60),
-              const DetailsBox(), // no routeObserver needed
+              const DetailsBox(),
             ],
           ),
         ),

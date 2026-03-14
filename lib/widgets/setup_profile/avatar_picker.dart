@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:neural_nexus_protocol/constants/colors.dart';
 import 'package:neural_nexus_protocol/services/api_service.dart';
+import 'package:neural_nexus_protocol/widgets/common/avatar_frame.dart';
 
 class AvatarPicker extends StatefulWidget {
   const AvatarPicker({
@@ -47,42 +47,27 @@ class _AvatarPickerState extends State<AvatarPicker> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Large preview
         Center(
-          child: Container(
-            width: 110,
-            height: 110,
-            decoration: BoxDecoration(
-              border: Border.all(color: NeuralColors.teal, width: 1.5),
-              color: NeuralColors.teal.withValues(alpha: 0.05),
-              boxShadow: [
-                BoxShadow(
-                  color: NeuralColors.teal.withValues(alpha: 0.15),
-                  blurRadius: 24,
-                  spreadRadius: -4,
-                ),
-              ],
-            ),
+          child: AvatarFrame(
+            imageUrl: _selectedAvatar,
+            fallbackText: 'A',
+            size: 110,
             padding: const EdgeInsets.all(10),
-            child: SvgPicture.network(
-              _selectedAvatar,
-              placeholderBuilder: (_) => Center(
-                child: SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 1,
-                    color: NeuralColors.tealDim,
-                  ),
+            backgroundColor: NeuralColors.teal.withValues(alpha: 0.05),
+            glowOpacity: 0.15,
+            placeholder: const Center(
+              child: SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 1,
+                  color: NeuralColors.tealDim,
                 ),
               ),
             ),
           ),
         ),
-
         const SizedBox(height: 14),
-
-        // Avatar grid
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -97,35 +82,31 @@ class _AvatarPickerState extends State<AvatarPicker> {
             final selected = url == _selectedAvatar;
             return GestureDetector(
               onTap: () => _select(url),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                decoration: BoxDecoration(
-                  border: .all(
-                    color: selected ? NeuralColors.teal : NeuralColors.tealDark,
-                    width: selected ? 2 : 1,
-                  ),
-                  color: selected
-                      ? NeuralColors.teal.withValues(alpha: 0.1)
-                      : Colors.transparent,
-                ),
-                padding: const .all(4),
-                child: SvgPicture.network(
-                  url,
-                  placeholderBuilder: (_) => const SizedBox(),
-                ),
+              child: AvatarFrame(
+                imageUrl: url,
+                fallbackText: 'A',
+                size: 48,
+                padding: const EdgeInsets.all(4),
+                fit: BoxFit.contain,
+                borderColor: selected
+                    ? NeuralColors.teal
+                    : NeuralColors.tealDark,
+                borderWidth: selected ? 2 : 1,
+                glowOpacity: selected ? 0.15 : 0,
+                backgroundColor: selected
+                    ? NeuralColors.teal.withValues(alpha: 0.1)
+                    : Colors.transparent,
+                placeholder: const SizedBox(),
               ),
             );
           },
         ),
-
         const SizedBox(height: 8),
-
-        // Refresh button
         ElevatedButton.icon(
           onPressed: _refresh,
-          icon: Icon(Icons.refresh, color: NeuralColors.tealDim, size: 16),
+          icon: const Icon(Icons.refresh, color: NeuralColors.tealDim, size: 16),
           label: Text(
-            'Generate new avatars'.toUpperCase(),
+            'GENERATE NEW AVATARS',
             style: GoogleFonts.spaceMono(
               fontSize: 10,
               color: NeuralColors.tealDim,
