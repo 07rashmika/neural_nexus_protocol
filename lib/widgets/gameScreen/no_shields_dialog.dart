@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,7 +7,7 @@ import 'package:neural_nexus_protocol/widgets/common/button.dart';
 import 'package:neural_nexus_protocol/widgets/shield_count.dart';
 
 class NoShieldsDialog extends ConsumerWidget {
-  const NoShieldsDialog({required this.onDismiss});
+  const NoShieldsDialog({super.key, required this.onDismiss});
   final VoidCallback onDismiss;
 
   @override

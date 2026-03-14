@@ -82,12 +82,6 @@ class _AuthFormState extends ConsumerState<AuthForm>
     Future<void> handleSubmit() async {
       setState(() => _apiError = null);
 
-      print('=== SUBMIT PRESSED ===');
-      print('isLoginScreen: $isLoginScreen');
-      print('email: ${_emailController.text}');
-      print('password length: ${_passwordController.text.length}');
-      print('username: ${_usernameController.text}');
-      print('confirmPassword: ${_confirmPasswordController.text}');
 
       final isValid = _formKey.currentState?.validate() ?? false;
       if (!isValid) return;

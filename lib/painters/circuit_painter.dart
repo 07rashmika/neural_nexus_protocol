@@ -56,14 +56,6 @@ class CircuitPainter extends CustomPainter {
     ],
   ];
 
-  // chips
-  static final List<Rect> _chips = [
-    const .fromLTWH(.26, .15, .10, .06),
-    const .fromLTWH(.44, .33, .12, .07),
-    const .fromLTWH(.56, .67, .10, .06),
-    const .fromLTWH(.82, .48, .09, .06),
-  ];
-
   @override
   void paint(Canvas canvas, Size size) {
     final linePaint = Paint()
@@ -73,15 +65,6 @@ class CircuitPainter extends CustomPainter {
 
     final nodePaint = Paint()
       ..color = teal.withValues(alpha: .4)
-      ..style = .fill;
-
-    final chipBorderPaint = Paint()
-      ..color = teal.withValues(alpha: .35)
-      ..strokeWidth = 1.5
-      ..style = .stroke;
-
-    final chipFillPaint = Paint()
-      ..color = NeuralColors.chipBg
       ..style = .fill;
 
     // Circuit paths
@@ -101,16 +84,6 @@ class CircuitPainter extends CustomPainter {
       for (int i = 1; i < points.length - 1; i++) {
         canvas.drawCircle(points[i], 3, nodePaint);
       }
-    }
-
-    // drawing chips
-    for (final chip in _chips) {
-      final rectangle = Rect.fromLTWH(
-        chip.left * chip.width,
-        chip.top * chip.height,
-        chip.width * chip.width,
-        chip.height * chip.height,
-      );
     }
 
     // pulse dots

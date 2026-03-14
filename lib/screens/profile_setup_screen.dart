@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:neural_nexus_protocol/providers/agent_provider.dart';
 import 'package:neural_nexus_protocol/widgets/authentication/input_field.dart';
 import 'package:neural_nexus_protocol/widgets/common/button.dart';
+import 'package:neural_nexus_protocol/widgets/common/inline_status_message.dart';
 import 'package:neural_nexus_protocol/widgets/section_label.dart';
 import 'package:neural_nexus_protocol/widgets/setup_profile/avatar_picker.dart';
 import 'package:neural_nexus_protocol/widgets/setup_profile/country_dropdown.dart';
@@ -34,7 +35,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
   bool _loadingCountries = true;
   String? _countriesError;
 
-  bool _loading = false;
   String? _error;
 
   late AnimationController _flickerCtrl;
@@ -90,10 +90,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
       return;
     }
 
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+    setState(() => _error = null);
 
     try {
       final Agent agent = await ApiService.setupProfile(
@@ -113,8 +110,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
       ).pushNamedAndRemoveUntil('/home', (route) => false, arguments: agent);
     } on Exception catch (e) {
       setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
-    } finally {
-      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -209,59 +204,13 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
                 const SizedBox(height: 8),
 
                 if (_loadingCountries)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 14,
-                      horizontal: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: NeuralColors.tealDark),
-                    ),
-                    child: Row(
-                      children: [
-                        const SizedBox(
-                          width: 12,
-                          height: 12,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1.5,
-                            color: NeuralColors.tealDim,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Loading countries...',
-                          style: GoogleFonts.spaceMono(
-                            fontSize: 11,
-                            color: NeuralColors.tealBorder,
-                          ),
-                        ),
-                      ],
-                    ),
+                  const InlineStatusMessage.loading(
+                    message: 'Loading countries...',
                   )
                 else if (_countriesError != null)
-                  Row(
-                    children: [
-                      Text(
-                        _countriesError!,
-                        style: GoogleFonts.spaceMono(
-                          fontSize: 10,
-                          color: const Color(0xFFFF4B6E),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      GestureDetector(
-                        onTap: _fetchCountries,
-                        child: Text(
-                          'RETRY',
-                          style: GoogleFonts.spaceMono(
-                            fontSize: 10,
-                            color: NeuralColors.teal,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ),
-                    ],
+                  InlineStatusMessage.error(
+                    error: _countriesError!,
+                    onRetry: _fetchCountries,
                   )
                 else
                   CountryDropdown(

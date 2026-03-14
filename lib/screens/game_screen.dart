@@ -9,7 +9,15 @@ import 'package:neural_nexus_protocol/providers/agent_provider.dart';
 import 'package:neural_nexus_protocol/providers/shield_provider.dart';
 import 'package:neural_nexus_protocol/services/api_service.dart';
 import 'package:neural_nexus_protocol/widgets/common/button.dart';
+import 'package:neural_nexus_protocol/widgets/common/glow_text.dart';
+import 'package:neural_nexus_protocol/widgets/gameScreen/digit_keypad.dart';
 import 'package:neural_nexus_protocol/widgets/gameScreen/no_shields_dialog.dart';
+import 'package:neural_nexus_protocol/widgets/gameScreen/pause_dialog.dart';
+import 'package:neural_nexus_protocol/widgets/gameScreen/puzzle_answer_feedback.dart';
+import 'package:neural_nexus_protocol/widgets/gameScreen/puzzle_hint_chip.dart';
+import 'package:neural_nexus_protocol/widgets/gameScreen/puzzle_image_panel.dart';
+import 'package:neural_nexus_protocol/widgets/gameScreen/puzzle_timer_bar.dart';
+import 'package:neural_nexus_protocol/widgets/info_row.dart';
 import 'package:neural_nexus_protocol/widgets/shield_count.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
@@ -48,15 +56,14 @@ class _GameScreenState extends ConsumerState<GameScreen>
   bool _answered = false;
 
   int _score = 0;
-  int _totalCarrots = 0;
 
-  // hint state
   bool _hintVisible = false;
   bool _hintUsedThisPuzzle = false;
   bool _usingHint = false;
   late int _carrotsRemaining;
 
   bool _levelUp = false;
+  bool _paused = false;
 
   late int _timerSeconds;
   int _timeLeft = 30;
@@ -95,6 +102,45 @@ class _GameScreenState extends ConsumerState<GameScreen>
     super.dispose();
   }
 
+  // ── Pause ─────────────────────────────────────────────────────────
+
+  void _onPause() {
+    if (_answered || _nodeDone || _loading) return;
+    _timer?.cancel();
+    setState(() => _paused = true);
+    _showPauseDialog();
+  }
+
+  void _resumeGame() {
+    setState(() => _paused = false);
+    _startTimer();
+  }
+
+  void _showPauseDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.transparent, // we handle blur ourselves
+      builder: (_) => PauseDialog(
+        node: widget.node,
+        puzzleIndex: _puzzleIndex,
+        score: _score,
+        timeLeft: _timeLeft,
+        carrotsRemaining: _carrotsRemaining,
+        onResume: () {
+          Navigator.of(context).pop();
+          _resumeGame();
+        },
+        onQuit: () {
+          Navigator.of(context).pop(); // pop dialog
+          _backToNodes(false);
+        },
+      ),
+    );
+  }
+
+  // ── Init / fetch ──────────────────────────────────────────────────
+
   Future<void> _initGame() async {
     await ref.read(shieldProvider.notifier).sync();
     if (!mounted) return;
@@ -119,6 +165,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
       _hintUsedThisPuzzle = false;
       _timeLeft = _timerSeconds;
       _levelUp = false;
+      _paused = false;
     });
     _timer?.cancel();
     try {
@@ -149,7 +196,6 @@ class _GameScreenState extends ConsumerState<GameScreen>
         _hintUsedThisPuzzle = true;
       });
     } catch (_) {
-      // silent
     } finally {
       if (mounted) setState(() => _usingHint = false);
     }
@@ -157,6 +203,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (_paused) return;
       if (_timeLeft <= 1) {
         t.cancel();
         _onTimeUp();
@@ -177,7 +224,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
   }
 
   void _onAnswer(int digit) {
-    if (_answered) return;
+    if (_answered || _paused) return;
     _timer?.cancel();
     final correct = digit == _solution;
     setState(() {
@@ -186,17 +233,17 @@ class _GameScreenState extends ConsumerState<GameScreen>
       _answered = true;
     });
     _glowCtrl.forward(from: 0);
-    if (correct)
+    if (correct) {
       _handleCorrectAnswer(digit);
-    else
+    } else {
       _handleWrongAnswer(digit: digit);
+    }
   }
 
   Future<void> _handleCorrectAnswer(int digit) async {
     final multiplier = _chainMultiplier;
     setState(() {
       _score += (10 + _timeLeft) * multiplier;
-      _totalCarrots += _carrots ?? 0;
       _passedCount++;
     });
     final result = await ApiService.submitAnswer(
@@ -216,7 +263,6 @@ class _GameScreenState extends ConsumerState<GameScreen>
   Future<void> _onNodeFailed() async {
     try {
       await ApiService.failNode();
-      // Reset streak in agentProvider
       final agent = ref.read(agentProvider);
       if (agent != null) {
         ref.read(agentProvider.notifier).state = agent.copyWith(streak: 0);
@@ -273,10 +319,11 @@ class _GameScreenState extends ConsumerState<GameScreen>
         _nodeDone = true;
         _nodePassed = passed;
       });
-      if (passed)
+      if (passed) {
         _completeNodeOnBackend();
-      else
+      } else {
         _onNodeFailed();
+      }
     }
   }
 
@@ -344,6 +391,16 @@ class _GameScreenState extends ConsumerState<GameScreen>
     );
   }
 
+  void _backToNodes(bool passed) {
+    Future.delayed(const Duration(milliseconds: 600), () {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      Navigator.of(context).pop(passed);
+    });
+  }
+
+  // ── Build ─────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     final shields = ref.watch(shieldProvider);
@@ -351,9 +408,9 @@ class _GameScreenState extends ConsumerState<GameScreen>
       backgroundColor: NeuralColors.bg,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const .symmetric(horizontal: 24, vertical: 16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             children: [
               _buildHeader(shields),
               const SizedBox(height: 6),
@@ -363,7 +420,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
               const SizedBox(height: 20),
               Expanded(
                 child: !_shieldCheckDone
-                    ? Center(
+                    ? const Center(
                         child: CircularProgressIndicator(
                           strokeWidth: 1.5,
                           color: NeuralColors.tealDim,
@@ -401,7 +458,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
             children: List.generate(widget.node.lives + 1, (i) {
               final spent = i > _livesLeft;
               return Padding(
-                padding: const EdgeInsets.only(right: 4),
+                padding: const .only(right: 4),
                 child: Icon(
                   spent ? Icons.favorite_border : Icons.favorite,
                   color: spent
@@ -422,6 +479,25 @@ class _GameScreenState extends ConsumerState<GameScreen>
             fontWeight: FontWeight.w700,
           ),
         ),
+        const SizedBox(width: 10),
+
+        // ── Pause button ───────────────────────────────────────────
+        if (!_nodeDone)
+          GestureDetector(
+            onTap: _onPause,
+            child: Container(
+              padding: const .all(6),
+              decoration: BoxDecoration(
+                border: Border.all(color: NeuralColors.tealDark),
+                color: Colors.transparent,
+              ),
+              child: const Icon(
+                Icons.pause,
+                color: NeuralColors.tealDim,
+                size: 16,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -459,7 +535,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
               return Expanded(
                 child: Container(
                   height: 3,
-                  margin: EdgeInsets.only(right: i < total - 1 ? 3 : 0),
+                  margin: .only(right: i < total - 1 ? 3 : 0),
                   color: c,
                 ),
               );
@@ -471,62 +547,16 @@ class _GameScreenState extends ConsumerState<GameScreen>
   }
 
   Widget _buildTimerBar() {
-    final fraction = _timeLeft / _timerSeconds;
-    final barColor = fraction > 0.5
-        ? NeuralColors.teal
-        : fraction > 0.25
-        ? const Color(0xFFFFB347)
-        : const Color(0xFFFF4B6E);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'TIME',
-              style: GoogleFonts.spaceMono(
-                fontSize: 9,
-                color: NeuralColors.tealBorder,
-                letterSpacing: 3,
-              ),
-            ),
-            Text(
-              '${_timeLeft}s',
-              style: GoogleFonts.spaceMono(
-                fontSize: 11,
-                color: barColor,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        ClipRect(
-          child: Container(
-            height: 3,
-            width: double.infinity,
-            color: NeuralColors.tealDark,
-            child: AnimatedFractionallySizedBox(
-              widthFactor: fraction,
-              duration: const Duration(milliseconds: 800),
-              curve: Curves.linear,
-              alignment: Alignment.centerLeft,
-              child: Container(color: barColor),
-            ),
-          ),
-        ),
-      ],
-    );
+    return PuzzleTimerBar(timeLeft: _timeLeft, totalSeconds: _timerSeconds);
   }
 
   Widget _buildPuzzleBody() {
     if (_loading) {
       return Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
-            SizedBox(
+            const SizedBox(
               width: 22,
               height: 22,
               child: CircularProgressIndicator(
@@ -550,7 +580,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
     if (_error != null) {
       return Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
             Text(
               _error!,
@@ -558,7 +588,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
                 fontSize: 11,
                 color: const Color(0xFFFF4B6E),
               ),
-              textAlign: TextAlign.center,
+              textAlign: .center,
             ),
             const SizedBox(height: 20),
             Button(text: 'Retry', onTap: _fetchPuzzle),
@@ -568,172 +598,54 @@ class _GameScreenState extends ConsumerState<GameScreen>
     }
 
     final mult = _chainMultiplier;
+    final points = (10 + _timeLeft) * mult;
 
     return Column(
       children: [
-        Expanded(
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              border: Border.all(color: NeuralColors.tealDark),
-              color: NeuralColors.teal.withValues(alpha: 0.02),
-            ),
-            padding: const EdgeInsets.all(12),
-            child: Image.network(
-              _questionUrl!,
-              fit: BoxFit.contain,
-              loadingBuilder: (_, child, progress) => progress == null
-                  ? child
-                  : Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 1,
-                        color: NeuralColors.tealDim,
-                      ),
-                    ),
-              errorBuilder: (_, _, _) => Center(
-                child: Text(
-                  'IMAGE ERROR',
-                  style: GoogleFonts.spaceMono(
-                    fontSize: 11,
-                    color: const Color(0xFFFF4B6E),
-                    letterSpacing: 2,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-
+        PuzzleImagePanel(imageUrl: _questionUrl!),
         const SizedBox(height: 8),
-
-        // ── Hint / intel row ─────────────────────────────────────────
         if (!_answered)
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: .spaceBetween,
             children: [
               Text(
-                '+${(10 + _timeLeft) * mult} IP  x$mult',
+                '+$points IP  x$mult',
                 style: GoogleFonts.spaceMono(
                   fontSize: 9,
                   color: NeuralColors.tealDark,
                 ),
               ),
-              GestureDetector(
-                onTap:
-                    (_carrotsRemaining > 0 &&
-                        !_hintUsedThisPuzzle &&
-                        !_usingHint)
-                    ? _onUseHint
-                    : null,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: (_carrotsRemaining > 0 && !_hintUsedThisPuzzle)
-                          ? const Color(0xFFFFB347)
-                          : NeuralColors.tealDark,
-                    ),
-                    color: (_carrotsRemaining > 0 && !_hintUsedThisPuzzle)
-                        ? const Color(0xFFFFB347).withValues(alpha: 0.08)
-                        : Colors.transparent,
-                  ),
-                  child: _usingHint
-                      ? const SizedBox(
-                          width: 12,
-                          height: 12,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1.5,
-                            color: Color(0xFFFFB347),
-                          ),
-                        )
-                      : Text(
-                          _hintVisible
-                              ? 'HINT: $_carrots'
-                              : '🥕 x$_carrotsRemaining  HINT',
-                          style: GoogleFonts.spaceMono(
-                            fontSize: 9,
-                            letterSpacing: 1,
-                            color:
-                                (_carrotsRemaining > 0 && !_hintUsedThisPuzzle)
-                                ? const Color(0xFFFFB347)
-                                : NeuralColors.tealDark,
-                          ),
-                        ),
-                ),
+              PuzzleHintChip(
+                label: _hintVisible
+                    ? 'HINT: $_carrots'
+                    : '🥕 x$_carrotsRemaining  HINT',
+                isAvailable: _carrotsRemaining > 0 && !_hintUsedThisPuzzle,
+                isLoading: _usingHint,
+                onTap: _onUseHint,
               ),
             ],
           ),
-
         if (_answered)
-          AnimatedBuilder(
+          PuzzleAnswerFeedback(
             animation: _glowAnim,
-            builder: (_, _) {
-              final intel = _answerCorrect == true
-                  ? (10 + _timeLeft) * mult
-                  : 0;
-              final color = _answerCorrect == true
-                  ? NeuralColors.teal
-                  : const Color(0xFFFF4B6E);
-              return Column(
-                children: [
-                  Text(
-                    _answerCorrect == true
-                        ? '✓  +$intel IP  x$mult'
-                        : _selectedAnswer == null
-                        ? '✗  TIME\'S UP  —  chain broken'
-                        : '✗  WRONG  (ans: $_solution)  —  chain broken',
-                    style: GoogleFonts.spaceMono(
-                      fontSize: 10,
-                      color: color,
-                      letterSpacing: 1,
-                      shadows: [
-                        Shadow(
-                          color: color.withValues(alpha: _glowAnim.value * 0.8),
-                          blurRadius: 12 * _glowAnim.value,
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  if (_answerCorrect == true && mult >= 2)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        mult >= 5 ? '🔥 MAX CHAIN x$mult' : '⚡ CHAIN x$mult',
-                        style: GoogleFonts.spaceMono(
-                          fontSize: 10,
-                          color: const Color(0xFFFFB347),
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 2,
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            },
+            isCorrect: _answerCorrect == true,
+            selectedAnswer: _selectedAnswer,
+            solution: _solution!,
+            pointsEarned: points,
+            chainMultiplier: mult,
+            showChainBreakText: true,
+            showCorrectAnswerOnTimeout: false,
           ),
-
         const SizedBox(height: 10),
-
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 5,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: 1.6,
-          ),
-          itemCount: 10,
-          itemBuilder: (_, i) => _buildDigitKey(i),
+        DigitKeypad(
+          isAnswered: _answered,
+          correctDigit: _solution,
+          selectedDigit: _selectedAnswer,
+          isCorrectAnswer: _answerCorrect,
+          isEnabled: !_paused,
+          onDigitTap: _onAnswer,
         ),
-
         const SizedBox(height: 14),
-
         if (_answered && !_nodeDone)
           Button(
             text: _puzzleIndex + 1 >= widget.node.puzzleCount
@@ -745,46 +657,6 @@ class _GameScreenState extends ConsumerState<GameScreen>
     );
   }
 
-  Widget _buildDigitKey(int digit) {
-    Color border = NeuralColors.tealDark;
-    Color bg = Colors.transparent;
-    Color text = NeuralColors.textMain;
-    if (_answered) {
-      if (digit == _solution) {
-        border = NeuralColors.teal;
-        bg = NeuralColors.teal.withValues(alpha: 0.12);
-        text = NeuralColors.teal;
-      } else if (digit == _selectedAnswer && !(_answerCorrect ?? true)) {
-        border = const Color(0xFFFF4B6E);
-        bg = const Color(0xFFFF4B6E).withValues(alpha: 0.1);
-        text = const Color(0xFFFF4B6E);
-      } else {
-        border = NeuralColors.tealDark.withValues(alpha: 0.4);
-        text = NeuralColors.tealBorder;
-      }
-    }
-    return GestureDetector(
-      onTap: _answered ? null : () => _onAnswer(digit),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          border: Border.all(color: border),
-          color: bg,
-        ),
-        child: Center(
-          child: Text(
-            '$digit',
-            style: GoogleFonts.spaceMono(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: text,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildNodeResult() {
     final passed = _nodePassed;
     final color = passed ? NeuralColors.teal : const Color(0xFFFF4B6E);
@@ -792,7 +664,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
     return Center(
       child: SingleChildScrollView(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
             Icon(
               passed ? Icons.verified_rounded : Icons.cancel_outlined,
@@ -800,17 +672,13 @@ class _GameScreenState extends ConsumerState<GameScreen>
               size: 52,
             ),
             const SizedBox(height: 20),
-            Text(
-              passed
+            GlowText(
+              text: passed
                   ? 'NODE ${widget.node.nodeNumber} CLEARED'
                   : 'NODE ${widget.node.nodeNumber} FAILED',
-              style: GoogleFonts.spaceMono(
-                fontSize: 14,
-                color: color,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 3,
-              ),
-              textAlign: TextAlign.center,
+              fontSize: 18,
+              fontWeight: .w600,
+              letterSpacing: 2,
             ),
             const SizedBox(height: 6),
             Text(
@@ -822,18 +690,22 @@ class _GameScreenState extends ConsumerState<GameScreen>
               ),
             ),
             const SizedBox(height: 24),
-            _resultRow(
-              'Puzzles',
-              '$_passedCount / ${widget.node.puzzleCount} passed',
+            InfoRow(
+              label: 'Puzzles',
+              value: '$_passedCount / ${widget.node.puzzleCount} passed',
             ),
-            _resultRow('Score', '$_score pts'),
+            InfoRow(label: 'Score', value: '$_score pts'),
             if (agent != null)
-              _resultRow('Intel', '${agent.intelPoints.toStringAsFixed(0)} IP'),
-            if (agent != null) _resultRow('Chain', 'x${agent.chainMultiplier}'),
-            _resultRow('Hints left', '🥕 x$_carrotsRemaining'),
+              InfoRow(
+                label: 'Intel',
+                value: '${agent.intelPoints.toStringAsFixed(0)} IP',
+              ),
+            if (agent != null)
+              InfoRow(label: 'Chain', value: 'x${agent.chainMultiplier}'),
+            InfoRow(label: 'Hints left', value: '🥕 x$_carrotsRemaining'),
             if (passed && _completing)
               Padding(
-                padding: const EdgeInsets.only(top: 8),
+                padding: const .only(top: 8),
                 child: Text(
                   'Saving...',
                   style: GoogleFonts.spaceMono(
@@ -844,7 +716,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
               ),
             if (_levelUp)
               Padding(
-                padding: const EdgeInsets.only(top: 8),
+                padding: const .only(top: 8),
                 child: Text(
                   '▲ LEVEL UP!',
                   style: GoogleFonts.spaceMono(
@@ -857,18 +729,12 @@ class _GameScreenState extends ConsumerState<GameScreen>
               ),
             const SizedBox(height: 32),
             if (passed)
-              Button(
-                text: 'Back to Nodes',
-                onTap: () => Navigator.of(context).pop(true),
-              )
+              Button(text: 'Back to Nodes', onTap: () => _backToNodes(true))
             else ...[
-              Button(
-                text: 'Try Again',
-                onTap: () => Navigator.of(context).pop(false),
-              ),
+              Button(text: 'Try Again', onTap: () => _backToNodes(false)),
               const SizedBox(height: 18),
               GestureDetector(
-                onTap: () => Navigator.of(context).pop(false),
+                onTap: () => _backToNodes(false),
                 child: Text(
                   'Back',
                   style: GoogleFonts.spaceMono(
@@ -884,30 +750,6 @@ class _GameScreenState extends ConsumerState<GameScreen>
       ),
     );
   }
-
-  Widget _resultRow(String label, String value) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          '$label: ',
-          style: GoogleFonts.spaceMono(
-            fontSize: 10,
-            color: NeuralColors.tealDim,
-          ),
-        ),
-        Text(
-          value,
-          style: GoogleFonts.spaceMono(
-            fontSize: 10,
-            color: NeuralColors.textMain,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    ),
-  );
 
   Color _difficultyColor(NodeDifficulty d) => switch (d) {
     NodeDifficulty.standard => Colors.greenAccent,

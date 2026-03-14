@@ -171,9 +171,9 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
 
   Widget _buildUsernameRow() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: const .symmetric(vertical: 5),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           Row(
             children: [
@@ -200,11 +200,11 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
                         style: GoogleFonts.spaceMono(
                             fontSize: 12, color: NeuralColors.textMain, letterSpacing: 1),
                         cursorColor: NeuralColors.teal,
-                        textCapitalization: TextCapitalization.none,
+                        textCapitalization: .none,
                         decoration: InputDecoration(
                           isDense: true,
-                          contentPadding: EdgeInsets.zero,
-                          border: InputBorder.none,
+                          contentPadding: .zero,
+                          border: .none,
                           hintText: 'new username',
                           hintStyle: GoogleFonts.spaceMono(
                               fontSize: 12, color: NeuralColors.tealDark),
@@ -228,14 +228,14 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
                 GestureDetector(
                   onTap: _saveUsername,
                   child: const Padding(
-                    padding: EdgeInsets.only(left: 8),
+                    padding: .only(left: 8),
                     child: Icon(Icons.check, size: 16, color: NeuralColors.teal),
                   ),
                 ),
                 GestureDetector(
                   onTap: _cancelEdit,
                   child: const Padding(
-                    padding: EdgeInsets.only(left: 6),
+                    padding: .only(left: 6),
                     child: Icon(Icons.close, size: 16, color: Color(0xFFFF4B6E)),
                   ),
                 ),
@@ -246,7 +246,7 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
                     _usernameError   = null;
                   }),
                   child: const Padding(
-                    padding: EdgeInsets.only(left: 8),
+                    padding: .only(left: 8),
                     child: Icon(Icons.edit_outlined, size: 14, color: NeuralColors.tealDim),
                   ),
                 ),
@@ -254,7 +254,7 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
           ),
           if (_usernameError != null)
             Padding(
-              padding: const EdgeInsets.only(top: 4, left: 102),
+              padding: const .only(top: 4, left: 102),
               child: Text(
                 _usernameError!,
                 style: GoogleFonts.spaceMono(

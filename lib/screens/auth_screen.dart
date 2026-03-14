@@ -32,13 +32,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       if (isLoginScreen) {
         final res = await ApiService.login(email: email, password: password);
         if (!res['success']) throw Exception(res['message']);
-        print('LOGIN RESPONSE: $res');
 
         final agent = await ApiService.getProfile();
         ref.read(agentProvider.notifier).state = agent;
-        print('PROFILE RESPONSE: $agent');
 
-        if (!mounted) return;
+        if (!context.mounted) return;
         Navigator.of(
           context,
         ).pushNamedAndRemoveUntil('/home', (route) => false);
@@ -50,7 +48,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         );
         if (!res['success']) throw Exception(res['message']);
 
-        if (!mounted) return;
+        if (!context.mounted) return;
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const ProfileSetupScreen()),
         );

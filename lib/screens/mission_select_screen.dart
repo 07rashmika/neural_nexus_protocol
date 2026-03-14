@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:neural_nexus_protocol/constants/colors.dart';
 import 'package:neural_nexus_protocol/models/node.dart';
 import 'package:neural_nexus_protocol/models/sector.dart';
 import 'package:neural_nexus_protocol/screens/game_screen.dart';
 import 'package:neural_nexus_protocol/services/api_service.dart';
-import 'package:neural_nexus_protocol/widgets/common/glow_text.dart';
+import 'package:neural_nexus_protocol/widgets/common/async_state_view.dart';
+import 'package:neural_nexus_protocol/widgets/common/retro_back_app_bar.dart';
 import 'package:neural_nexus_protocol/widgets/missionSelect/node_card.dart';
 
 class MissionSelectScreen extends StatefulWidget {
@@ -52,51 +52,11 @@ class _MissionSelectScreenState extends State<MissionSelectScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 80,
-        leading: FittedBox(
-          fit: .scaleDown,
-          alignment: .centerLeft,
-          child: Padding(
-            padding: const .only(left: 16),
-            child: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: Row(
-                mainAxisSize: .min,
-                children: [
-                  const Icon(
-                    Icons.arrow_back_ios,
-                    color: NeuralColors.tealDim,
-                    size: 12,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'BACK',
-                    style: GoogleFonts.spaceMono(
-                      fontSize: 12,
-                      color: NeuralColors.tealDim,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        title: GlowText(
-          text:
-              '${widget.sector.name.toUpperCase()} · ${widget.sector.subtitle.toUpperCase()}',
-          fontSize: 11,
-          fontWeight: .w700,
-          letterSpacing: 2,
-        ),
-        centerTitle: true,
-        backgroundColor: NeuralColors.bg2,
-        automaticallyImplyLeading: false,
-        bottom: PreferredSize(
-          preferredSize: const .fromHeight(1.5),
-          child: Container(height: 1.5, color: NeuralColors.teal),
-        ),
+      appBar: RetroBackAppBar(
+        title: '${widget.sector.name.toUpperCase()} · ${widget.sector.subtitle.toUpperCase()}',
+        titleFontSize: 11,
+        titleLetterSpacing: 2,
+        leadingPadding: const EdgeInsets.only(left: 16),
       ),
       backgroundColor: Colors.transparent,
       body: _buildBody(),
@@ -105,38 +65,10 @@ class _MissionSelectScreenState extends State<MissionSelectScreen> {
 
   Widget _buildBody() {
     if (_loading) {
-      return const Center(
-        child: CircularProgressIndicator(color: NeuralColors.teal),
-      );
+      return const AsyncStateView.loading();
     }
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: .min,
-          children: [
-            Text(
-              _error!,
-              style: GoogleFonts.spaceMono(
-                color: Colors.redAccent,
-                fontSize: 11,
-              ),
-              textAlign: .center,
-            ),
-            const SizedBox(height: 16),
-            GestureDetector(
-              onTap: _loadNodes,
-              child: Text(
-                'RETRY',
-                style: GoogleFonts.spaceMono(
-                  color: NeuralColors.teal,
-                  fontSize: 11,
-                  letterSpacing: 2,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
+      return AsyncStateView.error(error: _error!, onRetry: _loadNodes);
     }
 
     return RefreshIndicator(

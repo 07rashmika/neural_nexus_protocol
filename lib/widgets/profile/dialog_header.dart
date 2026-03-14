@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../constants/colors.dart';
 import '../../models/agent.dart';
+import '../common/avatar_frame.dart';
 
 class DialogHeader extends StatelessWidget {
   const DialogHeader({super.key, required this.agent});
@@ -20,51 +20,14 @@ class DialogHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
       child: Row(
         children: [
-          // Avatar — SVG if available, fallback to initials
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              border: Border.all(color: NeuralColors.teal, width: 1.5),
-              color: NeuralColors.bg2,
-              boxShadow: [
-                BoxShadow(
-                  color: NeuralColors.teal.withValues(alpha: 0.3),
-                  blurRadius: 12,
-                  spreadRadius: -2,
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.all(4),
-            child: agent.avatarUrl.isNotEmpty
-                ? SvgPicture.network(
-                    agent.avatarUrl,
-                    placeholderBuilder: (_) => Center(
-                      child: Text(
-                        initials,
-                        style: GoogleFonts.spaceMono(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: NeuralColors.teal,
-                        ),
-                      ),
-                    ),
-                  )
-                : Center(
-                    child: Text(
-                      initials,
-                      style: GoogleFonts.spaceMono(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: NeuralColors.teal,
-                      ),
-                    ),
-                  ),
+          AvatarFrame(
+            imageUrl: agent.avatarUrl,
+            fallbackText: initials,
+            size: 56,
+            fallbackFontSize: 16,
+            glowOpacity: 0.3,
           ),
-
           const SizedBox(width: 14),
-
-          // Username + callsign/position
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,8 +69,6 @@ class DialogHeader extends StatelessWidget {
               ],
             ),
           ),
-
-          // Close button
           GestureDetector(
             onTap: () => Navigator.of(context).pop(),
             child: const Icon(
