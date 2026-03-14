@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:neural_nexus_protocol/constants/colors.dart';
 import 'package:neural_nexus_protocol/models/sector.dart';
 import 'package:neural_nexus_protocol/services/api_service.dart';
+import 'package:neural_nexus_protocol/services/audio_service.dart';
 import 'package:neural_nexus_protocol/widgets/common/async_state_view.dart';
 import 'package:neural_nexus_protocol/widgets/common/retro_back_app_bar.dart';
 import 'package:neural_nexus_protocol/widgets/sectorMap/overall_progress.dart';
@@ -24,6 +25,9 @@ class _SectorMapState extends State<SectorMap> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await AppAudioService.instance.ensureBackgroundMusic();
+    });
     loadSectors();
   }
 
@@ -51,9 +55,7 @@ class _SectorMapState extends State<SectorMap> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const RetroBackAppBar(
-        title: 'SECTOR MAP',
-      ),
+      appBar: const RetroBackAppBar(title: 'SECTOR MAP'),
       backgroundColor: Colors.transparent,
       body: _buildBody(),
     );

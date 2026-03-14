@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:neural_nexus_protocol/constants/colors.dart';
+import 'package:neural_nexus_protocol/services/audio_service.dart';
 
 class Button extends StatefulWidget {
-  const Button({
-    super.key,
-    required this.text,
-    required this.onTap,
-  });
+  const Button({super.key, required this.text, required this.onTap});
 
   final String text;
   final void Function() onTap;
@@ -27,7 +23,10 @@ class _ButtonState extends State<Button> {
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) => setState(() => _pressed = false),
       onTapCancel: () => setState(() => _pressed = false),
-      onTap: widget.onTap,
+      onTap: () async {
+        await AppAudioService.instance.playButtonTap();
+        widget.onTap();
+      },
       child: MouseRegion(
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),

@@ -4,6 +4,7 @@ import 'package:neural_nexus_protocol/models/node.dart';
 import 'package:neural_nexus_protocol/models/sector.dart';
 import 'package:neural_nexus_protocol/screens/game_screen.dart';
 import 'package:neural_nexus_protocol/services/api_service.dart';
+import 'package:neural_nexus_protocol/services/audio_service.dart';
 import 'package:neural_nexus_protocol/widgets/common/async_state_view.dart';
 import 'package:neural_nexus_protocol/widgets/common/retro_back_app_bar.dart';
 import 'package:neural_nexus_protocol/widgets/missionSelect/node_card.dart';
@@ -53,7 +54,8 @@ class _MissionSelectScreenState extends State<MissionSelectScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: RetroBackAppBar(
-        title: '${widget.sector.name.toUpperCase()} · ${widget.sector.subtitle.toUpperCase()}',
+        title:
+            '${widget.sector.name.toUpperCase()} · ${widget.sector.subtitle.toUpperCase()}',
         titleFontSize: 11,
         titleLetterSpacing: 2,
         leadingPadding: const EdgeInsets.only(left: 16),
@@ -92,14 +94,19 @@ class _MissionSelectScreenState extends State<MissionSelectScreen> {
 
   void _onStartNode(NodeModel node) {
     if (node.isLocked || node.isCompleted) return;
-    Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (_) => GameScreen(
-        node: node,
-        sectorCode: widget.sector.code,
-        carrotsRemaining: _carrotsRemaining, // ← pass it
-      ),
-    ),
-  ).then((_) => _loadNodes());
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (_) => GameScreen(
+              node: node,
+              sectorCode: widget.sector.code,
+              carrotsRemaining: _carrotsRemaining, // ← pass it
+            ),
+          ),
+        )
+        .then((_) async {
+          await AppAudioService.instance.resumeBackgroundMusic();
+          _loadNodes();
+        });
   }
 }

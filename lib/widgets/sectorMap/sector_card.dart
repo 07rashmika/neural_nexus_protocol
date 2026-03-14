@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:neural_nexus_protocol/constants/colors.dart';
 import 'package:neural_nexus_protocol/models/sector.dart';
 import 'package:neural_nexus_protocol/screens/mission_select_screen.dart';
+import 'package:neural_nexus_protocol/services/audio_service.dart';
 import 'package:neural_nexus_protocol/widgets/common/pixel_border.dart';
 import 'package:neural_nexus_protocol/widgets/sectorMap/node_dots.dart';
 
@@ -44,15 +45,17 @@ class _SectorCardState extends State<SectorCard> {
         onTapCancel: _isLocked ? null : () => setState(() => _pressed = false),
         onTap: _isLocked
             ? null
-            : () {
-                Navigator.of(context)
-                    .push(
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            MissionSelectScreen(sector: widget.sector),
-                      ),
-                    )
-                    .then((_) => widget.onReturn()); // ← call it on return
+            : () async {
+                await AppAudioService.instance.playButtonTap();
+
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => MissionSelectScreen(sector: widget.sector),
+                  ),
+                );
+
+                await AppAudioService.instance.ensureBackgroundMusic();
+                widget.onReturn();
               },
         child: AnimatedScale(
           scale: _pressed ? 0.98 : 1.0,

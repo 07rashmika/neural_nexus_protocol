@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:neural_nexus_protocol/constants/colors.dart';
+import 'package:neural_nexus_protocol/services/audio_service.dart';
 
 class DigitKey extends StatelessWidget {
   const DigitKey({
@@ -44,7 +45,12 @@ class DigitKey extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap: isEnabled && !isAnswered ? onTap : null,
+      onTap: isEnabled && !isAnswered
+          ? () async {
+              await AppAudioService.instance.playSoftTap();
+              onTap?.call();
+            }
+          : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(

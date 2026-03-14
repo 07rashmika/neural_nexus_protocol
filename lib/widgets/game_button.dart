@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:neural_nexus_protocol/constants/colors.dart';
+import 'package:neural_nexus_protocol/services/audio_service.dart';
+
 import '../painters/game_button_border_painter.dart';
 import '../painters/scan_line.dart';
 
@@ -44,12 +45,18 @@ class _GameButtonState extends State<GameButton>
   }
 
   Future<void> _handleTap() async {
+    await AppAudioService.instance.playButtonTap();
+
     for (int i = 0; i < 4; i++) {
       if (!mounted) return;
       setState(() => _flashing = i.isEven);
       await Future.delayed(const Duration(milliseconds: 75));
     }
-    if (mounted) setState(() => _flashing = false);
+
+    if (mounted) {
+      setState(() => _flashing = false);
+    }
+
     widget.onTap();
   }
 

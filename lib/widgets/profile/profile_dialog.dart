@@ -5,6 +5,7 @@ import 'package:neural_nexus_protocol/constants/colors.dart';
 import 'package:neural_nexus_protocol/providers/agent_provider.dart';
 import 'package:neural_nexus_protocol/providers/login_screen_provider.dart';
 import 'package:neural_nexus_protocol/services/api_service.dart';
+import 'package:neural_nexus_protocol/services/audio_service.dart';
 import 'package:neural_nexus_protocol/widgets/common/pixel_border.dart';
 import 'package:neural_nexus_protocol/widgets/stat_bar.dart';
 
@@ -30,7 +31,7 @@ class ProfileDialog extends ConsumerStatefulWidget {
 
 class _ProfileDialogState extends ConsumerState<ProfileDialog> {
   bool _editingUsername = false;
-  bool _savingUsername  = false;
+  bool _savingUsername = false;
   String? _usernameError;
   late TextEditingController _usernameCtrl;
 
@@ -50,7 +51,7 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
 
   Future<void> _saveUsername() async {
     final newUsername = _usernameCtrl.text.trim();
-    final agent       = ref.read(agentProvider);
+    final agent = ref.read(agentProvider);
     if (agent == null) return;
 
     if (newUsername.isEmpty) {
@@ -66,16 +67,21 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
       return;
     }
 
-    setState(() { _savingUsername = true; _usernameError = null; });
+    setState(() {
+      _savingUsername = true;
+      _usernameError = null;
+    });
 
     try {
       await ApiService.updateUsername(newUsername);
-      ref.read(agentProvider.notifier).state =
-          agent.copyWith(username: newUsername);
+      ref.read(agentProvider.notifier).state = agent.copyWith(
+        username: newUsername,
+      );
       setState(() => _editingUsername = false);
     } catch (e) {
-      setState(() => _usernameError =
-          e.toString().replaceFirst('Exception: ', ''));
+      setState(
+        () => _usernameError = e.toString().replaceFirst('Exception: ', ''),
+      );
     } finally {
       if (mounted) setState(() => _savingUsername = false);
     }
@@ -83,7 +89,10 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
 
   void _cancelEdit() {
     _usernameCtrl.text = ref.read(agentProvider)?.username ?? '';
-    setState(() { _editingUsername = false; _usernameError = null; });
+    setState(() {
+      _editingUsername = false;
+      _usernameError = null;
+    });
   }
 
   Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
@@ -123,7 +132,8 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
                       _buildUsernameRow(),
                       InfoRow(
                         label: 'agent id',
-                        value: '#${agent.id.toString().substring(0, 8).toUpperCase()}',
+                        value:
+                            '#${agent.id.toString().substring(0, 8).toUpperCase()}',
                       ),
                       if (agent.callsign != null && agent.callsign!.isNotEmpty)
                         InfoRow(label: 'callsign', value: agent.callsign!),
@@ -143,7 +153,10 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
                         value: '${agent.streak}x',
                         valueColor: agent.streak > 0 ? NeuralColors.teal : null,
                       ),
-                      InfoRow(label: 'shields', value: '🛡 x${agent.shieldCount}'),
+                      InfoRow(
+                        label: 'shields',
+                        value: '🛡 x${agent.shieldCount}',
+                      ),
                       InfoRow(
                         label: 'chain mult',
                         value: '${agent.chainMultiplier}x',
@@ -183,14 +196,20 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
                   'USERNAME',
                   style: GoogleFonts.spaceMono(
                     fontSize: 13,
-                    color: _editingUsername ? NeuralColors.teal : NeuralColors.textDim,
+                    color: _editingUsername
+                        ? NeuralColors.teal
+                        : NeuralColors.textDim,
                     letterSpacing: 1,
                   ),
                 ),
               ),
               Container(
-                  width: 1, height: 12,
-                  color: _editingUsername ? NeuralColors.teal : NeuralColors.tealBorder),
+                width: 1,
+                height: 12,
+                color: _editingUsername
+                    ? NeuralColors.teal
+                    : NeuralColors.tealBorder,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: _editingUsername
@@ -198,7 +217,10 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
                         controller: _usernameCtrl,
                         autofocus: true,
                         style: GoogleFonts.spaceMono(
-                            fontSize: 12, color: NeuralColors.textMain, letterSpacing: 1),
+                          fontSize: 12,
+                          color: NeuralColors.textMain,
+                          letterSpacing: 1,
+                        ),
                         cursorColor: NeuralColors.teal,
                         textCapitalization: .none,
                         decoration: InputDecoration(
@@ -207,47 +229,76 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
                           border: .none,
                           hintText: 'new username',
                           hintStyle: GoogleFonts.spaceMono(
-                              fontSize: 12, color: NeuralColors.tealDark),
+                            fontSize: 12,
+                            color: NeuralColors.tealDark,
+                          ),
                         ),
                         onSubmitted: (_) => _saveUsername(),
                       )
                     : Text(
                         ref.read(agentProvider)!.username.toUpperCase(),
                         style: GoogleFonts.spaceMono(
-                            fontSize: 12, color: NeuralColors.textMain, letterSpacing: 1),
+                          fontSize: 12,
+                          color: NeuralColors.textMain,
+                          letterSpacing: 1,
+                        ),
                       ),
               ),
               // Action icons
               if (_savingUsername)
                 const SizedBox(
-                  width: 14, height: 14,
+                  width: 14,
+                  height: 14,
                   child: CircularProgressIndicator(
-                      strokeWidth: 1.5, color: NeuralColors.teal),
+                    strokeWidth: 1.5,
+                    color: NeuralColors.teal,
+                  ),
                 )
               else if (_editingUsername) ...[
                 GestureDetector(
-                  onTap: _saveUsername,
+                  onTap: () async {
+                    await AppAudioService.instance.playSoftTap();
+                    _saveUsername();
+                  },
                   child: const Padding(
                     padding: .only(left: 8),
-                    child: Icon(Icons.check, size: 16, color: NeuralColors.teal),
+                    child: Icon(
+                      Icons.check,
+                      size: 16,
+                      color: NeuralColors.teal,
+                    ),
                   ),
                 ),
                 GestureDetector(
-                  onTap: _cancelEdit,
+                  onTap: () async {
+                    await AppAudioService.instance.playSoftTap();
+                    _cancelEdit();
+                  },
                   child: const Padding(
                     padding: .only(left: 6),
-                    child: Icon(Icons.close, size: 16, color: Color(0xFFFF4B6E)),
+                    child: Icon(
+                      Icons.close,
+                      size: 16,
+                      color: Color(0xFFFF4B6E),
+                    ),
                   ),
                 ),
               ] else
                 GestureDetector(
-                  onTap: () => setState(() {
-                    _editingUsername = true;
-                    _usernameError   = null;
-                  }),
+                  onTap: () async {
+                    await AppAudioService.instance.playSoftTap();
+                    setState(() {
+                      _editingUsername = true;
+                      _usernameError = null;
+                    });
+                  },
                   child: const Padding(
                     padding: .only(left: 8),
-                    child: Icon(Icons.edit_outlined, size: 14, color: NeuralColors.tealDim),
+                    child: Icon(
+                      Icons.edit_outlined,
+                      size: 14,
+                      color: NeuralColors.tealDim,
+                    ),
                   ),
                 ),
             ],
@@ -258,7 +309,10 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
               child: Text(
                 _usernameError!,
                 style: GoogleFonts.spaceMono(
-                    fontSize: 9, color: const Color(0xFFFF4B6E), letterSpacing: 1),
+                  fontSize: 9,
+                  color: const Color(0xFFFF4B6E),
+                  letterSpacing: 1,
+                ),
               ),
             ),
         ],

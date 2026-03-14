@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:neural_nexus_protocol/constants/colors.dart';
+import 'package:neural_nexus_protocol/services/audio_service.dart';
 import 'package:neural_nexus_protocol/services/api_service.dart';
 import 'package:neural_nexus_protocol/widgets/common/avatar_frame.dart';
 
@@ -30,7 +31,8 @@ class _AvatarPickerState extends State<AvatarPicker> {
     });
   }
 
-  void _refresh() {
+  void _refresh() async {
+    await AppAudioService.instance.playButtonTap();
     setState(() {
       _avatarOptions = ApiService.generateAvatarOptions(count: 6);
       _selectedAvatar = _avatarOptions.first;
@@ -38,7 +40,8 @@ class _AvatarPickerState extends State<AvatarPicker> {
     widget.onAvatarSelected(_selectedAvatar);
   }
 
-  void _select(String url) {
+  void _select(String url) async {
+    await AppAudioService.instance.playSoftTap();
     setState(() => _selectedAvatar = url);
     widget.onAvatarSelected(url);
   }

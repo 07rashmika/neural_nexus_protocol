@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:neural_nexus_protocol/constants/colors.dart';
+import 'package:neural_nexus_protocol/services/audio_service.dart';
 
 class PuzzleHintChip extends StatelessWidget {
   const PuzzleHintChip({
@@ -30,7 +30,12 @@ class PuzzleHintChip extends StatelessWidget {
         : NeuralColors.tealDark;
 
     return GestureDetector(
-      onTap: isAvailable && !isLoading ? onTap : null,
+      onTap: isAvailable && !isLoading
+          ? () async {
+              await AppAudioService.instance.playButtonTap();
+              onTap?.call();
+            }
+          : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

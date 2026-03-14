@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:neural_nexus_protocol/constants/colors.dart';
+import 'package:neural_nexus_protocol/services/audio_service.dart';
 
 class CountryDropdown extends StatefulWidget {
   const CountryDropdown({
@@ -45,7 +46,8 @@ class _CountryDropdownState extends State<CountryDropdown> {
     });
   }
 
-  void _toggle() {
+  void _toggle() async {
+    await AppAudioService.instance.playSoftTap();
     setState(() {
       _showSearch = !_showSearch;
       if (_showSearch) {
@@ -67,7 +69,9 @@ class _CountryDropdownState extends State<CountryDropdown> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             decoration: BoxDecoration(
               border: Border.all(
-                color: _showSearch ? NeuralColors.tealDim : NeuralColors.tealDark,
+                color: _showSearch
+                    ? NeuralColors.tealDim
+                    : NeuralColors.tealDark,
                 width: _showSearch ? 1.5 : 1,
               ),
               color: NeuralColors.teal.withValues(alpha: 0.02),
@@ -88,7 +92,9 @@ class _CountryDropdownState extends State<CountryDropdown> {
                 ),
                 const Spacer(),
                 Icon(
-                  _showSearch ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  _showSearch
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
                   color: NeuralColors.tealDim,
                   size: 18,
                 ),
@@ -159,9 +165,11 @@ class _CountryDropdownState extends State<CountryDropdown> {
                     itemCount: _filtered.length,
                     itemBuilder: (_, i) {
                       final c = _filtered[i];
-                      final isSelected = widget.selectedCountry?['name'] == c['name'];
+                      final isSelected =
+                          widget.selectedCountry?['name'] == c['name'];
                       return GestureDetector(
-                        onTap: () {
+                        onTap: () async {
+                          await AppAudioService.instance.playSoftTap();
                           widget.onCountrySelected(c);
                           setState(() => _showSearch = false);
                         },

@@ -6,8 +6,8 @@ import 'package:neural_nexus_protocol/widgets/authentication/input_field.dart';
 import 'package:neural_nexus_protocol/widgets/common/button.dart';
 import 'package:neural_nexus_protocol/widgets/common/inline_status_message.dart';
 import 'package:neural_nexus_protocol/widgets/section_label.dart';
-import 'package:neural_nexus_protocol/widgets/setup_profile/avatar_picker.dart';
-import 'package:neural_nexus_protocol/widgets/setup_profile/country_dropdown.dart';
+import 'package:neural_nexus_protocol/widgets/setupProfile/avatar_picker.dart';
+import 'package:neural_nexus_protocol/widgets/setupProfile/country_dropdown.dart';
 
 import '../constants/colors.dart';
 import '../models/agent.dart';

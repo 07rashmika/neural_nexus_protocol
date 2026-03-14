@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../constants/colors.dart';
+import '../../services/audio_service.dart';
 
 class DialogFooter extends StatelessWidget {
   const DialogFooter({super.key, required this.onLogout});
@@ -16,7 +17,10 @@ class DialogFooter extends StatelessWidget {
         mainAxisAlignment: .end,
         children: [
           GestureDetector(
-            onTap: onLogout,
+            onTap: () async {
+              await AppAudioService.instance.playButtonTap();
+              onLogout();
+            },
             child: Container(
               padding: const .symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
