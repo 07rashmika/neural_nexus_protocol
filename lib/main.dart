@@ -8,7 +8,7 @@ import 'package:neural_nexus_protocol/screens/home_screen.dart';
 import 'package:neural_nexus_protocol/widgets/circuit_background.dart';
 import 'package:neural_nexus_protocol/widgets/common/audio_app_wrapper.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   SystemChrome.setSystemUIOverlayStyle(
