@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:neural_nexus_protocol/constants/colors.dart';
 
 class PuzzleTimerBar extends StatelessWidget {
@@ -20,8 +19,8 @@ class PuzzleTimerBar extends StatelessWidget {
     final barColor = fraction > 0.5
         ? NeuralColors.teal
         : fraction > 0.25
-            ? const Color(0xFFFFB347)
-            : const Color(0xFFFF4B6E);
+        ? const Color(0xFFFFB347)
+        : const Color(0xFFFF4B6E);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,13 +36,14 @@ class PuzzleTimerBar extends StatelessWidget {
                 letterSpacing: 3,
               ),
             ),
-            Text(
-              '${timeLeft}s',
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 500),
               style: GoogleFonts.spaceMono(
                 fontSize: 11,
                 color: barColor,
                 fontWeight: FontWeight.w700,
               ),
+              child: Text('${timeLeft}s'),
             ),
           ],
         ),
@@ -58,7 +58,10 @@ class PuzzleTimerBar extends StatelessWidget {
               duration: const Duration(milliseconds: 800),
               curve: Curves.linear,
               alignment: Alignment.centerLeft,
-              child: Container(color: barColor),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 500),
+                color: barColor,
+              ),
             ),
           ),
         ),

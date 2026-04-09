@@ -390,6 +390,35 @@ class _GameScreenState extends ConsumerState<GameScreen>
     });
   }
 
+  void _restartLevel() {
+    _timer?.cancel();
+
+    if (ref.read(shieldProvider).isEmpty) {
+      _showNoShieldsDialog();
+      return;
+    }
+
+    setState(() {
+      _puzzleIndex = 0;
+      _passedCount = 0;
+      _livesLeft = widget.node.lives;
+      _nodeDone = false;
+      _nodePassed = false;
+      _completing = false;
+      _selectedAnswer = null;
+      _answerCorrect = null;
+      _answered = false;
+      _score = 0;
+      _hintVisible = false;
+      _hintUsedThisPuzzle = false;
+      _usingHint = false;
+      _levelUp = false;
+      _paused = false;
+      _timeLeft = _timerSeconds;
+    });
+    _fetchPuzzle();
+  }
+
   @override
   Widget build(BuildContext context) {
     final shields = ref.watch(shieldProvider);
@@ -433,6 +462,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
       node: widget.node,
       livesLeft: _livesLeft,
       score: _score,
+      chainMultiplier: _chainMultiplier,
       nodeDone: _nodeDone,
       onPause: _onPause,
     );
@@ -491,7 +521,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
       completing: _completing,
       levelUp: _levelUp,
       onBackSuccess: () => _backToNodes(true),
-      onTryAgain: () => _backToNodes(false),
+      onTryAgain: _restartLevel,
     );
   }
 }
