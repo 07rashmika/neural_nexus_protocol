@@ -62,7 +62,7 @@ class _AuthFormState extends ConsumerState<AuthForm>
     super.dispose();
   }
 
-  /// Clears all fields and resets validation when switching between login/register
+  //clears all fields and resets validation when switching between login/register
   void _clearAll() {
     _emailController.clear();
     _passwordController.clear();
@@ -82,7 +82,6 @@ class _AuthFormState extends ConsumerState<AuthForm>
     Future<void> handleSubmit() async {
       setState(() => _apiError = null);
 
-
       final isValid = _formKey.currentState?.validate() ?? false;
       if (!isValid) return;
 
@@ -95,7 +94,6 @@ class _AuthFormState extends ConsumerState<AuthForm>
               : _confirmPasswordController.text,
           username: isLoginScreen ? null : _usernameController.text.trim(),
         );
-        // ← navigation removed from here, auth_screen.dart handles it
       } on Exception catch (e) {
         setState(
           () => _apiError = e.toString().replaceFirst('Exception: ', ''),

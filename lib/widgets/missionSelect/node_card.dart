@@ -57,7 +57,7 @@ class _NodeCardState extends State<NodeCard> {
                 : NeuralColors.bg2,
             child: Column(
               children: [
-                // ── Card body ─────────────────────────────────────────
+                // Card body
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
@@ -141,7 +141,7 @@ class _NodeCardState extends State<NodeCard> {
                     ),
                   ),
 
-                // ── Completed stamp ───────────────────────────────────
+                // Completed stamp 
                 if (node.isCompleted)
                   Container(
                     width: double.infinity,

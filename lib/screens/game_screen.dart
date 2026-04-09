@@ -7,13 +7,13 @@ import 'package:neural_nexus_protocol/models/node.dart';
 import 'package:neural_nexus_protocol/providers/agent_provider.dart';
 import 'package:neural_nexus_protocol/providers/shield_provider.dart';
 import 'package:neural_nexus_protocol/services/api_service.dart';
-import 'package:neural_nexus_protocol/widgets/gameScreen/no_shields_dialog.dart';
-import 'package:neural_nexus_protocol/widgets/gameScreen/pause_dialog.dart';
-import 'package:neural_nexus_protocol/widgets/gameScreen/puzzle_timer_bar.dart';
 import 'package:neural_nexus_protocol/widgets/gameScreen/game_puzzle_body.dart';
 import 'package:neural_nexus_protocol/widgets/gameScreen/game_screen_header.dart';
+import 'package:neural_nexus_protocol/widgets/gameScreen/no_shields_dialog.dart';
 import 'package:neural_nexus_protocol/widgets/gameScreen/node_progress_bar.dart';
 import 'package:neural_nexus_protocol/widgets/gameScreen/node_result_panel.dart';
+import 'package:neural_nexus_protocol/widgets/gameScreen/pause_dialog.dart';
+import 'package:neural_nexus_protocol/widgets/gameScreen/puzzle_timer_bar.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
   const GameScreen({
@@ -97,8 +97,6 @@ class _GameScreenState extends ConsumerState<GameScreen>
     super.dispose();
   }
 
-  // ── Pause ─────────────────────────────────────────────────────────
-
   void _onPause() {
     if (_answered || _nodeDone || _loading) return;
     _timer?.cancel();
@@ -133,8 +131,6 @@ class _GameScreenState extends ConsumerState<GameScreen>
       ),
     );
   }
-
-  // ── Init / fetch ──────────────────────────────────────────────────
 
   Future<void> _initGame() async {
     await ref.read(shieldProvider.notifier).sync();
@@ -394,8 +390,6 @@ class _GameScreenState extends ConsumerState<GameScreen>
     });
   }
 
-  // ── Build ─────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
     final shields = ref.watch(shieldProvider);
@@ -500,5 +494,4 @@ class _GameScreenState extends ConsumerState<GameScreen>
       onTryAgain: () => _backToNodes(false),
     );
   }
-
 }

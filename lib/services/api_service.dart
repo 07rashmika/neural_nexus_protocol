@@ -13,8 +13,7 @@ class ApiService {
       'https://nonallelic-nonrectified-matias.ngrok-free.dev/api';
   static const _storage = FlutterSecureStorage();
 
-  // dicebear avatar bots generation
-
+  //dicebear avatar bots generation
   static List<String> generateAvatarOptions({int count = 6}) {
     final rng = Random();
     return List.generate(count, (_) {
@@ -23,8 +22,7 @@ class ApiService {
     });
   }
 
-  // authentication
-
+  //authentication
   static Future<Map<String, dynamic>> register({
     required String email,
     required String password,
@@ -68,7 +66,6 @@ class ApiService {
   }
 
   // profile management
-
   static Future<Agent> setupProfile({
     required String username,
     required String avatarUrl,
@@ -218,8 +215,7 @@ class ApiService {
     return body;
   }
 
-  // ── Heart Puzzle ──────────────────────────────────────────────────────────────
-
+  //Heart Puzzle
   static Future<Map<String, dynamic>> fetchHeartPuzzle() async {
     const url = 'https://marcconrad.com/uob/heart/api.php?out=json&base64=no';
     final response = await http.get(Uri.parse(url));

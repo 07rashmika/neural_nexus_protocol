@@ -8,11 +8,6 @@ import 'package:neural_nexus_protocol/widgets/chain/chain.dart';
 import 'package:neural_nexus_protocol/widgets/common/pixel_border.dart';
 import 'package:neural_nexus_protocol/widgets/shield_count.dart';
 
-// No routeObserver needed anymore — shieldProvider handles all sync/ticking.
-// The RouteObserver + didPopNext sync is also moved into shieldProvider.sync()
-// which GameScreen calls on entry, so by the time the user returns home the
-// provider already holds the authoritative values.
-
 class DetailsBox extends ConsumerWidget {
   const DetailsBox({super.key});
 
@@ -31,8 +26,6 @@ class DetailsBox extends ConsumerWidget {
 
     if (agent == null) return const SizedBox.shrink();
 
-    // chainMultiplier is written by game_controller and synced via agentProvider
-    // after every round — no need to derive it from intel points
     final chainActive = agent.chainMultiplier.clamp(0, _maxChain);
 
     return PixelBorder(

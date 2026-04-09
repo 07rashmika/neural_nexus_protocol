@@ -31,7 +31,7 @@ class Agent {
   final int streak;
   final int shieldCount;
   final int chainMultiplier;
-  final DateTime? lastShieldLostAt; // ← new
+  final DateTime? lastShieldLostAt;
 
   factory Agent.fromJson(Map<String, dynamic> json, {required String token}) {
     return Agent(

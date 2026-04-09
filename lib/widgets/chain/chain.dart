@@ -79,6 +79,7 @@ class _ChainWidgetState extends State<ChainWidget>
       mainAxisSize: .min,
       crossAxisAlignment: .center,
       children: List.generate(widget.count * 2 - 1, (i) {
+        //claude
         // Even indices → circle nodes, odd indices → connecting lines
         if (i.isEven) {
           final nodeIndex = i ~/ 2;
