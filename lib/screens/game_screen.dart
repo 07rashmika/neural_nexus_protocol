@@ -2,23 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:neural_nexus_protocol/constants/colors.dart';
 import 'package:neural_nexus_protocol/models/node.dart';
 import 'package:neural_nexus_protocol/providers/agent_provider.dart';
 import 'package:neural_nexus_protocol/providers/shield_provider.dart';
 import 'package:neural_nexus_protocol/services/api_service.dart';
-import 'package:neural_nexus_protocol/widgets/common/button.dart';
-import 'package:neural_nexus_protocol/widgets/common/glow_text.dart';
-import 'package:neural_nexus_protocol/widgets/gameScreen/digit_keypad.dart';
+import 'package:neural_nexus_protocol/widgets/gameScreen/game_puzzle_body.dart';
+import 'package:neural_nexus_protocol/widgets/gameScreen/game_screen_header.dart';
 import 'package:neural_nexus_protocol/widgets/gameScreen/no_shields_dialog.dart';
+import 'package:neural_nexus_protocol/widgets/gameScreen/node_progress_bar.dart';
+import 'package:neural_nexus_protocol/widgets/gameScreen/node_result_panel.dart';
 import 'package:neural_nexus_protocol/widgets/gameScreen/pause_dialog.dart';
-import 'package:neural_nexus_protocol/widgets/gameScreen/puzzle_answer_feedback.dart';
-import 'package:neural_nexus_protocol/widgets/gameScreen/puzzle_hint_chip.dart';
-import 'package:neural_nexus_protocol/widgets/gameScreen/puzzle_image_panel.dart';
 import 'package:neural_nexus_protocol/widgets/gameScreen/puzzle_timer_bar.dart';
-import 'package:neural_nexus_protocol/widgets/info_row.dart';
-import 'package:neural_nexus_protocol/widgets/shield_count.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
   const GameScreen({
@@ -102,8 +97,6 @@ class _GameScreenState extends ConsumerState<GameScreen>
     super.dispose();
   }
 
-  // ── Pause ─────────────────────────────────────────────────────────
-
   void _onPause() {
     if (_answered || _nodeDone || _loading) return;
     _timer?.cancel();
@@ -138,8 +131,6 @@ class _GameScreenState extends ConsumerState<GameScreen>
       ),
     );
   }
-
-  // ── Init / fetch ──────────────────────────────────────────────────
 
   Future<void> _initGame() async {
     await ref.read(shieldProvider.notifier).sync();
@@ -399,8 +390,6 @@ class _GameScreenState extends ConsumerState<GameScreen>
     });
   }
 
-  // ── Build ─────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
     final shields = ref.watch(shieldProvider);
@@ -438,111 +427,23 @@ class _GameScreenState extends ConsumerState<GameScreen>
   }
 
   Widget _buildHeader(ShieldState shields) {
-    final agent = ref.watch(agentProvider);
-    return Row(
-      children: [
-        ShieldCount(count: shields.count, max: ShieldState.max),
-        const SizedBox(width: 10),
-        if (agent != null)
-          Text(
-            '${agent.intelPoints.toStringAsFixed(0)} IP',
-            style: GoogleFonts.spaceMono(
-              fontSize: 10,
-              color: NeuralColors.tealDim,
-              letterSpacing: 1,
-            ),
-          ),
-        const Spacer(),
-        if (widget.node.lives > 0) ...[
-          Row(
-            children: List.generate(widget.node.lives + 1, (i) {
-              final spent = i > _livesLeft;
-              return Padding(
-                padding: const .only(right: 4),
-                child: Icon(
-                  spent ? Icons.favorite_border : Icons.favorite,
-                  color: spent
-                      ? NeuralColors.tealDark
-                      : const Color(0xFFFF4B6E),
-                  size: 14,
-                ),
-              );
-            }),
-          ),
-          const SizedBox(width: 10),
-        ],
-        Text(
-          '$_score',
-          style: GoogleFonts.spaceMono(
-            fontSize: 13,
-            color: NeuralColors.teal,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(width: 10),
-
-        // ── Pause button ───────────────────────────────────────────
-        if (!_nodeDone)
-          GestureDetector(
-            onTap: _onPause,
-            child: Container(
-              padding: const .all(6),
-              decoration: BoxDecoration(
-                border: Border.all(color: NeuralColors.tealDark),
-                color: Colors.transparent,
-              ),
-              child: const Icon(
-                Icons.pause,
-                color: NeuralColors.tealDim,
-                size: 16,
-              ),
-            ),
-          ),
-      ],
+    return GameScreenHeader(
+      shields: shields,
+      agent: ref.watch(agentProvider),
+      node: widget.node,
+      livesLeft: _livesLeft,
+      score: _score,
+      nodeDone: _nodeDone,
+      onPause: _onPause,
     );
   }
 
   Widget _buildNodeProgressBar() {
-    final total = widget.node.puzzleCount;
-    final current = _puzzleIndex;
-    final diffColor = _difficultyColor(widget.node.difficulty);
-    return Row(
-      children: [
-        Text(
-          'NODE ${widget.node.nodeNumber}  ·  ${widget.node.difficultyLabel.toUpperCase()}  ·  ${_puzzleIndex + 1}/$total',
-          style: GoogleFonts.spaceMono(
-            fontSize: 9,
-            color: diffColor,
-            letterSpacing: 1.5,
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Row(
-            children: List.generate(total, (i) {
-              Color c;
-              if (i < current) {
-                c = NeuralColors.teal;
-              } else if (i == current) {
-                c = _answered
-                    ? (_answerCorrect == true
-                          ? NeuralColors.teal
-                          : const Color(0xFFFF4B6E))
-                    : NeuralColors.tealDim;
-              } else {
-                c = NeuralColors.tealDark;
-              }
-              return Expanded(
-                child: Container(
-                  height: 3,
-                  margin: .only(right: i < total - 1 ? 3 : 0),
-                  color: c,
-                ),
-              );
-            }),
-          ),
-        ),
-      ],
+    return NodeProgressBar(
+      node: widget.node,
+      puzzleIndex: _puzzleIndex,
+      answered: _answered,
+      answerCorrect: _answerCorrect,
     );
   }
 
@@ -551,210 +452,46 @@ class _GameScreenState extends ConsumerState<GameScreen>
   }
 
   Widget _buildPuzzleBody() {
-    if (_loading) {
-      return Center(
-        child: Column(
-          mainAxisSize: .min,
-          children: [
-            const SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(
-                strokeWidth: 1.5,
-                color: NeuralColors.tealDim,
-              ),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              'LOADING...',
-              style: GoogleFonts.spaceMono(
-                fontSize: 10,
-                color: NeuralColors.tealBorder,
-                letterSpacing: 3,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: .min,
-          children: [
-            Text(
-              _error!,
-              style: GoogleFonts.spaceMono(
-                fontSize: 11,
-                color: const Color(0xFFFF4B6E),
-              ),
-              textAlign: .center,
-            ),
-            const SizedBox(height: 20),
-            Button(text: 'Retry', onTap: _fetchPuzzle),
-          ],
-        ),
-      );
-    }
-
-    final mult = _chainMultiplier;
-    final points = (10 + _timeLeft) * mult;
-
-    return Column(
-      children: [
-        PuzzleImagePanel(imageUrl: _questionUrl!),
-        const SizedBox(height: 8),
-        if (!_answered)
-          Row(
-            mainAxisAlignment: .spaceBetween,
-            children: [
-              Text(
-                '+$points IP  x$mult',
-                style: GoogleFonts.spaceMono(
-                  fontSize: 9,
-                  color: NeuralColors.tealDark,
-                ),
-              ),
-              PuzzleHintChip(
-                label: _hintVisible
-                    ? 'HINT: $_carrots'
-                    : '🥕 x$_carrotsRemaining  HINT',
-                isAvailable: _carrotsRemaining > 0 && !_hintUsedThisPuzzle,
-                isLoading: _usingHint,
-                onTap: _onUseHint,
-              ),
-            ],
-          ),
-        if (_answered)
-          PuzzleAnswerFeedback(
-            animation: _glowAnim,
-            isCorrect: _answerCorrect == true,
-            selectedAnswer: _selectedAnswer,
-            solution: _solution!,
-            pointsEarned: points,
-            chainMultiplier: mult,
-            showChainBreakText: true,
-            showCorrectAnswerOnTimeout: false,
-          ),
-        const SizedBox(height: 10),
-        DigitKeypad(
-          isAnswered: _answered,
-          correctDigit: _solution,
-          selectedDigit: _selectedAnswer,
-          isCorrectAnswer: _answerCorrect,
-          isEnabled: !_paused,
-          onDigitTap: _onAnswer,
-        ),
-        const SizedBox(height: 14),
-        if (_answered && !_nodeDone)
-          Button(
-            text: _puzzleIndex + 1 >= widget.node.puzzleCount
-                ? 'Finish'
-                : 'Next Puzzle',
-            onTap: _onNextPuzzle,
-          ),
-      ],
+    return GamePuzzleBody(
+      isLoading: _loading,
+      error: _error,
+      questionUrl: _questionUrl,
+      answered: _answered,
+      answerCorrect: _answerCorrect,
+      selectedAnswer: _selectedAnswer,
+      solution: _solution,
+      timeLeft: _timeLeft,
+      chainMultiplier: _chainMultiplier,
+      hintVisible: _hintVisible,
+      hintValue: _carrots,
+      carrotsRemaining: _carrotsRemaining,
+      hintUsedThisPuzzle: _hintUsedThisPuzzle,
+      usingHint: _usingHint,
+      paused: _paused,
+      showChainBreakText: true,
+      showCorrectAnswerOnTimeout: false,
+      isLastPuzzle: _puzzleIndex + 1 >= widget.node.puzzleCount,
+      nodeDone: _nodeDone,
+      animation: _glowAnim,
+      onRetry: _fetchPuzzle,
+      onUseHint: _onUseHint,
+      onAnswer: _onAnswer,
+      onNextPuzzle: _onNextPuzzle,
     );
   }
 
   Widget _buildNodeResult() {
-    final passed = _nodePassed;
-    final color = passed ? NeuralColors.teal : const Color(0xFFFF4B6E);
-    final agent = ref.watch(agentProvider);
-    return Center(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: .min,
-          children: [
-            Icon(
-              passed ? Icons.verified_rounded : Icons.cancel_outlined,
-              color: color,
-              size: 52,
-            ),
-            const SizedBox(height: 20),
-            GlowText(
-              text: passed
-                  ? 'NODE ${widget.node.nodeNumber} CLEARED'
-                  : 'NODE ${widget.node.nodeNumber} FAILED',
-              fontSize: 18,
-              fontWeight: .w600,
-              letterSpacing: 2,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              widget.node.difficultyLabel.toUpperCase(),
-              style: GoogleFonts.spaceMono(
-                fontSize: 10,
-                color: _difficultyColor(widget.node.difficulty),
-                letterSpacing: 4,
-              ),
-            ),
-            const SizedBox(height: 24),
-            InfoRow(
-              label: 'Puzzles',
-              value: '$_passedCount / ${widget.node.puzzleCount} passed',
-            ),
-            InfoRow(label: 'Score', value: '$_score pts'),
-            if (agent != null)
-              InfoRow(
-                label: 'Intel',
-                value: '${agent.intelPoints.toStringAsFixed(0)} IP',
-              ),
-            if (agent != null)
-              InfoRow(label: 'Chain', value: 'x${agent.chainMultiplier}'),
-            InfoRow(label: 'Hints left', value: '🥕 x$_carrotsRemaining'),
-            if (passed && _completing)
-              Padding(
-                padding: const .only(top: 8),
-                child: Text(
-                  'Saving...',
-                  style: GoogleFonts.spaceMono(
-                    fontSize: 9,
-                    color: NeuralColors.tealDim,
-                  ),
-                ),
-              ),
-            if (_levelUp)
-              Padding(
-                padding: const .only(top: 8),
-                child: Text(
-                  '▲ LEVEL UP!',
-                  style: GoogleFonts.spaceMono(
-                    fontSize: 12,
-                    color: const Color(0xFFFFB347),
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 3,
-                  ),
-                ),
-              ),
-            const SizedBox(height: 32),
-            if (passed)
-              Button(text: 'Back to Nodes', onTap: () => _backToNodes(true))
-            else ...[
-              Button(text: 'Try Again', onTap: () => _backToNodes(false)),
-              const SizedBox(height: 18),
-              GestureDetector(
-                onTap: () => _backToNodes(false),
-                child: Text(
-                  'Back',
-                  style: GoogleFonts.spaceMono(
-                    fontSize: 15,
-                    color: NeuralColors.tealDim,
-                    letterSpacing: 2,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
+    return NodeResultPanel(
+      node: widget.node,
+      passed: _nodePassed,
+      passedCount: _passedCount,
+      score: _score,
+      agent: ref.watch(agentProvider),
+      carrotsRemaining: _carrotsRemaining,
+      completing: _completing,
+      levelUp: _levelUp,
+      onBackSuccess: () => _backToNodes(true),
+      onTryAgain: () => _backToNodes(false),
     );
   }
-
-  Color _difficultyColor(NodeDifficulty d) => switch (d) {
-    NodeDifficulty.standard => Colors.greenAccent,
-    NodeDifficulty.secured => NeuralColors.teal,
-    NodeDifficulty.critical => const Color(0xFFFFB347),
-    NodeDifficulty.boss => const Color(0xFFFF4B6E),
-  };
 }

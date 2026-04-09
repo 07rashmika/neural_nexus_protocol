@@ -128,7 +128,7 @@ class ShieldNotifier extends Notifier<ShieldState> {
     _restartTicker();
   }
 
-  // ── Called by GameScreen with the authoritative shieldData from /game/submit
+  //called by GameScreen with the authoritative shieldData from /game/submit
   void applyBackendResult(Map<String, dynamic> shieldData) {
     final newCount = shieldData['shield_count'] as int? ?? state.count;
     final rawTs = shieldData['last_shield_lost_at'] as String?;

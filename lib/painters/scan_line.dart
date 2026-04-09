@@ -1,3 +1,4 @@
+//claude code
 import 'package:flutter/material.dart';
 
 class ScanLinePainter extends CustomPainter {

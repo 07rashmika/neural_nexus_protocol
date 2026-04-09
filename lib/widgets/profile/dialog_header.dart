@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../constants/colors.dart';
 import '../../models/agent.dart';
+import '../../services/audio_service.dart';
 import '../common/avatar_frame.dart';
 
 class DialogHeader extends StatelessWidget {
@@ -70,7 +71,10 @@ class DialogHeader extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
+            onTap: () async {
+              await AppAudioService.instance.playSoftTap();
+              Navigator.of(context).pop();
+            },
             child: const Icon(
               Icons.close,
               color: NeuralColors.tealDim,

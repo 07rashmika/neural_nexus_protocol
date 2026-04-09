@@ -5,6 +5,8 @@ import 'package:neural_nexus_protocol/providers/agent_provider.dart';
 import 'package:neural_nexus_protocol/screens/daily_challenge_screen.dart';
 import 'package:neural_nexus_protocol/screens/leaderboard_screen.dart';
 import 'package:neural_nexus_protocol/screens/sector_map.dart';
+import 'package:neural_nexus_protocol/services/audio_service.dart';
+import 'package:neural_nexus_protocol/widgets/common/audio_toggle_button.dart';
 import 'package:neural_nexus_protocol/widgets/common/avatar_frame.dart';
 import 'package:neural_nexus_protocol/widgets/common/logo_box.dart';
 import 'package:neural_nexus_protocol/widgets/details_box.dart';
@@ -27,14 +29,23 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         toolbarHeight: 80,
         leading: IconButton(
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const LeaderboardScreen()),
-          ),
+          onPressed: () async {
+            await AppAudioService.instance.playButtonTap();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const LeaderboardScreen(),
+              ),
+            );
+          },
           icon: const Icon(Icons.leaderboard),
         ),
         actions: [
+          const AudioToggleButton(),
           GestureDetector(
-            onTap: () => showProfileDialog(context),
+            onTap: () async {
+              await AppAudioService.instance.playSoftTap();
+              showProfileDialog(context);
+            },
             child: Container(
               margin: const EdgeInsets.only(right: 16),
               child: AvatarFrame(

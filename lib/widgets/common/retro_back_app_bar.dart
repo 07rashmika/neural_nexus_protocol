@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:neural_nexus_protocol/constants/colors.dart';
+import 'package:neural_nexus_protocol/services/audio_service.dart';
 import 'package:neural_nexus_protocol/widgets/common/glow_text.dart';
 
 class RetroBackAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -12,7 +12,7 @@ class RetroBackAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.titleLetterSpacing = 4,
     this.titleFontWeight = FontWeight.w700,
     this.leadingPadding = const EdgeInsets.only(left: 16),
-    this.backFontSize = 12,
+    this.backFontSize = 22,
   });
 
   final String title;
@@ -35,7 +35,10 @@ class RetroBackAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: Padding(
           padding: leadingPadding,
           child: GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
+            onTap: () async {
+              await AppAudioService.instance.playButtonTap();
+              Navigator.of(context).pop();
+            },
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
