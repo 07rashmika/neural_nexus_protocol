@@ -110,7 +110,7 @@ class NodeResultPanel extends StatelessWidget {
               Button(text: 'Try Again', onTap: onTryAgain),
               const SizedBox(height: 18),
               GestureDetector(
-                onTap: onTryAgain,
+                onTap: onBackSuccess,
                 child: Text(
                   'Back',
                   style: GoogleFonts.spaceMono(
